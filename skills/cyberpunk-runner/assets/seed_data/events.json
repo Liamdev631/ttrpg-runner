@@ -1,0 +1,17 @@
+{
+  "dataset": "events",
+  "category": "event-seed",
+  "source_name": "cyberpunk-runner seed pack",
+  "source_url": "local://seed_data/events.json",
+  "license": "Openly shareable original content",
+  "records": [
+    {"name": "Transit Blackout", "summary": "A whole transit line goes dark just long enough for someone important to vanish.", "tags": ["infrastructure", "mystery"], "details": {}},
+    {"name": "Labor Flash Riot", "summary": "A labor protest pivots from speeches to shields when drone cops overreact.", "tags": ["riot", "workers"], "details": {}},
+    {"name": "Clinic Fire Sale", "summary": "A black clinic dumps inventory after a tip that regulators are coming.", "tags": ["medical", "market"], "details": {}},
+    {"name": "Braindance Leak", "summary": "A leaked memory clip rewrites the public story around a recent killing.", "tags": ["media", "memory"], "details": {}},
+    {"name": "Acid Rain Alert", "summary": "Weather sirens push crowds indoors while the real operators move through maintenance channels.", "tags": ["weather", "mobility"], "details": {}},
+    {"name": "Executive Memorial", "summary": "A memorial event doubles as a quiet power struggle over succession and secrets.", "tags": ["corporate", "social"], "details": {}},
+    {"name": "Auction of Last Resort", "summary": "Desperate families, gangs, and corps all bid on the same life-saving prototype.", "tags": ["auction", "medical"], "details": {}},
+    {"name": "Mesh Collapse", "summary": "A neighborhood's community network fails under pressure, isolating allies and exposing refugees.", "tags": ["network", "community"], "details": {}}
+  ]
+}

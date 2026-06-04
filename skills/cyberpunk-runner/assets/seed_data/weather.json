@@ -1,0 +1,15 @@
+{
+  "dataset": "weather",
+  "category": "weather",
+  "source_name": "cyberpunk-runner seed pack",
+  "source_url": "local://seed_data/weather.json",
+  "license": "Openly shareable original content",
+  "records": [
+    {"name": "Neon Rain", "summary": "Ordinary rain turns signage into liquid ghosts and reveals every moving light.", "tags": ["weather", "visual"], "details": {}},
+    {"name": "Static Mist", "summary": "Charged fog causes cheap implants and drones to stutter.", "tags": ["weather", "electrical"], "details": {}},
+    {"name": "Acid Drizzle", "summary": "Weak corrosive rain drives crowds under awnings and punishes exposed gear.", "tags": ["weather", "hazard"], "details": {}},
+    {"name": "Heat Bloom", "summary": "A trapped thermal inversion makes tower exhaust settle over the streets.", "tags": ["weather", "industrial"], "details": {}},
+    {"name": "Stormlight Front", "summary": "A bright electrical storm turns the skyline theatrical and dangerous.", "tags": ["weather", "storm"], "details": {}},
+    {"name": "Smog Dawn", "summary": "Morning light arrives filtered through particulates and rooftop ad glare.", "tags": ["weather", "atmosphere"], "details": {}}
+  ]
+}
