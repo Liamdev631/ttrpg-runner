@@ -1,0 +1,57 @@
+{
+  "dataset": "factions",
+  "category": "faction",
+  "source_name": "cyberpunk-runner seed pack",
+  "source_url": "local://seed_data/factions.json",
+  "license": "Openly shareable original content",
+  "records": [
+    {
+      "name": "Morrow Array",
+      "summary": "A medical megacorp that buys loyalty through subsidized implants and enforces contracts with private trauma teams.",
+      "tags": ["megacorp", "medical", "contracts"],
+      "details": {"style": "sterile luxury and surgical violence", "goal": "own urban healthcare"}
+    },
+    {
+      "name": "Saint Voltage",
+      "summary": "A street church turned mutual-aid hacker collective that patches bodies and networks for anyone the city writes off.",
+      "tags": ["collective", "hacker", "community"],
+      "details": {"style": "neon saints and burnt solder", "goal": "protect the abandoned"}
+    },
+    {
+      "name": "Blue Ember Logistics",
+      "summary": "A freight and drone-haul giant whose union-busting algorithms predict labor unrest before workers organize.",
+      "tags": ["megacorp", "shipping", "surveillance"],
+      "details": {"style": "cold efficiency", "goal": "frictionless movement of goods and data"}
+    },
+    {
+      "name": "The Silt Knives",
+      "summary": "An amphibious smuggling gang that controls flood tunnels, storm drains, and black-market river routes.",
+      "tags": ["gang", "smuggling", "territory"],
+      "details": {"style": "wet leathers and river steel", "goal": "own the undercity waterways"}
+    },
+    {
+      "name": "Helix Crown",
+      "summary": "A biotech investment house funding designer organs, memory editing, and morally flexible research parks.",
+      "tags": ["megacorp", "biotech", "finance"],
+      "details": {"style": "tasteful menace", "goal": "monetize human optimization"}
+    },
+    {
+      "name": "Afterimage News",
+      "summary": "A scandal-hungry holo-media network that weaponizes leaks, citizen footage, and manipulated outrage.",
+      "tags": ["media", "propaganda", "leaks"],
+      "details": {"style": "glitter, panic, and sponsored truth", "goal": "own the narrative"}
+    },
+    {
+      "name": "Concrete Choir",
+      "summary": "A tenant-defense movement with encrypted mesh networks, communal kitchens, and a talent for disappearing people from corp databases.",
+      "tags": ["activists", "housing", "mutual-aid"],
+      "details": {"style": "graffiti, drones, and block parties", "goal": "keep neighborhoods alive"}
+    },
+    {
+      "name": "Velvet Hex",
+      "summary": "An entertainment syndicate that manages idols, braindance stars, blackmail archives, and vice lounges.",
+      "tags": ["syndicate", "vice", "celebrity"],
+      "details": {"style": "luxury poison", "goal": "turn attention into leverage"}
+    }
+  ]
+}

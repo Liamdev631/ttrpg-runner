@@ -1,0 +1,19 @@
+{
+  "dataset": "gigs",
+  "category": "gig",
+  "source_name": "cyberpunk-runner seed pack",
+  "source_url": "local://seed_data/gigs.json",
+  "license": "Openly shareable original content",
+  "records": [
+    {"name": "Clinic Ghost Run", "summary": "Extract a whistleblower surgeon from a corporate black clinic before her memory gets rewritten.", "tags": ["extraction", "medical", "stealth"], "details": {"twist": "the surgeon does not want to leave without her patient archive"}},
+    {"name": "Braindance Wake", "summary": "Recover a dead celebrity's final unedited braindance before the studio spins the story.", "tags": ["media", "heist", "celebrity"], "details": {"twist": "the recording implicates the fixer"}},
+    {"name": "Flood Tunnel Relay", "summary": "Escort a mesh-network relay through gang-held drainage tunnels during a chemical storm.", "tags": ["escort", "gangs", "weather"], "details": {"twist": "the relay contains identities of hidden refugees"}},
+    {"name": "Proxy Executive", "summary": "Impersonate a vanished executive at a live merger gala long enough to sabotage the deal.", "tags": ["social", "infiltration", "corporate"], "details": {"twist": "the executive arranged the disappearance personally"}},
+    {"name": "Shut Down The Prophet", "summary": "Destroy or corrupt a predictive policing model before a targeted neighborhood gets designated hostile.", "tags": ["data", "activism", "sabotage"], "details": {"twist": "the model is frighteningly accurate because it uses future market bids"}},
+    {"name": "Ash Rail Hijack", "summary": "Board a freight maglev to steal a sealed prototype container before it reaches offshore buyers.", "tags": ["train", "cargo", "action"], "details": {"twist": "the container houses a living intelligence"}},
+    {"name": "Quiet Riot Broadcast", "summary": "Protect a pirate broadcast team long enough to expose labor-crime footage across the city.", "tags": ["defense", "media", "riot"], "details": {"twist": "someone on the crew already sold the transmitter location"}},
+    {"name": "Mercy Debt Collection", "summary": "Erase a neighborhood's predatory implant debt ledger from a lender's vault.", "tags": ["heist", "finance", "moral"], "details": {"twist": "wiping the debt triggers physical shutdown implants"}},
+    {"name": "The Skin Printer Job", "summary": "Steal a biotech printer that can fabricate custom tissue grafts before a cartel buyer claims it.", "tags": ["biotech", "theft", "race"], "details": {"twist": "the printer has recorded every face it rebuilt"}},
+    {"name": "Salted Idol Rescue", "summary": "Find an idol whose public meltdown was staged to hide an extraction by her own management syndicate.", "tags": ["rescue", "celebrity", "conspiracy"], "details": {"twist": "the idol wants revenge, not safety"}}
+  ]
+}

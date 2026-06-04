@@ -1,0 +1,57 @@
+{
+  "dataset": "districts",
+  "category": "location",
+  "source_name": "cyberpunk-runner seed pack",
+  "source_url": "local://seed_data/districts.json",
+  "license": "Openly shareable original content",
+  "records": [
+    {
+      "name": "Glass Canal Night Market",
+      "summary": "A floating bazaar of hacked kiosks, burner clinics, synth-food barges, and whisper brokers.",
+      "tags": ["market", "nightlife", "black-market"],
+      "details": {"danger": "pickpocket drones and contract killers", "opportunity": "anything can be bought if you know who is desperate"}
+    },
+    {
+      "name": "The Copper Maw",
+      "summary": "An industrial district of slag rain, freight rails, and refineries that never fully power down.",
+      "tags": ["industrial", "hazard", "cargo"],
+      "details": {"danger": "toxic runoff and corp patrols", "opportunity": "perfect cover for dirty exchanges"}
+    },
+    {
+      "name": "Cicada Heights",
+      "summary": "A stacked residential zone where rooftop gardens cling to luxury towers above failing utility blocks.",
+      "tags": ["residential", "class-divide", "verticality"],
+      "details": {"danger": "private security and tenant unrest", "opportunity": "infiltration through service spines"}
+    },
+    {
+      "name": "Null Pier",
+      "summary": "A decommissioned port turned data-smuggler haven where old customs scanners now hide contraband servers.",
+      "tags": ["port", "smuggling", "data"],
+      "details": {"danger": "ambush points in drydock shadows", "opportunity": "route stolen cargo off-grid"}
+    },
+    {
+      "name": "Saint Mercy Arcology",
+      "summary": "A sealed medical arcology advertising safety while quietly harvesting behavioral and biometric data.",
+      "tags": ["arcology", "medical", "surveillance"],
+      "details": {"danger": "controlled movement and omnipresent sensors", "opportunity": "high-value secrets behind polished walls"}
+    },
+    {
+      "name": "Signal Graveyard",
+      "summary": "A canyon of dead broadcast towers and pirate transmitters where rogue coders test illegal spectrum warfare.",
+      "tags": ["tech", "wasteland", "signals"],
+      "details": {"danger": "fried implants and hidden snipers", "opportunity": "anonymous transmission windows"}
+    },
+    {
+      "name": "Rainstep Bazaar",
+      "summary": "A pedestrian maze of monorail shadows, knockoff fashion, rolling protests, and food stalls running on stolen power.",
+      "tags": ["street", "commerce", "crowds"],
+      "details": {"danger": "crowd crush and undercover cops", "opportunity": "easy disguises and fast gossip"}
+    },
+    {
+      "name": "Obsidian Reef",
+      "summary": "An offshore tower cluster for executive retreats, offshore banking, and very discreet disappearances.",
+      "tags": ["luxury", "finance", "offshore"],
+      "details": {"danger": "airtight security bubbles", "opportunity": "one score can change a life"}
+    }
+  ]
+}
