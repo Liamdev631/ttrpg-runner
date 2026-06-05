@@ -7,6 +7,8 @@ It is packaged to work as either:
 - a directly copied external skill directory (`skills/cyberpunk-runner`)
 - a local skill dropped into `~/.hermes/skills/<category>/cyberpunk-runner/`
 
+> **Model Recommendation:** We strongly recommend running this skill against an **uncensored model**. Cyberpunk is brutal — the fiction leans on graphic violence, hard drugs, sexual content, corpo cruelty, and moral rot, and a heavily filtered model will sand the edges off the genre until the campaign stops feeling like cyberpunk. The skill is designed to play that material straight; pairing it with a sanitized model will produce muted, repetitive, and frankly boring sessions.
+
 ## What It Includes
 
 - A Hermes-native `SKILL.md` with progressive-disclosure references and configuration settings
