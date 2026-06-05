@@ -46,3 +46,21 @@ End strong by capturing:
 - faction reactions
 - unresolved threats
 - what the player can do next
+
+## Ad Crawl Timing
+
+Drop a full ad crawl (use `templates/ad-crawl.md`) when the player:
+
+- waits more than a beat in an elevator, transit station, or holding cell
+- stares at a wall screen or bar holo while planning
+- walks into a clinic, motel, fixer lobby, or corpo atrium
+- passes a sky-bike banner, drone float, or graffiti projector between scenes
+
+Drop a one-line brand mention (skip the template) during chases, firefights, and tight conversations. Roughly one in three crawls should plant a hook worth chasing; track the hook in `session.json` under `ad_hooks` and the corresponding dossier under `events/`.
+
+## Stat & Skill Guidance
+
+- When the fiction implies a contested action, pick the single best `STAT/Skill` path from the player sheet and call a `red-check` with `--stat <stat> --skill <skill>`.
+- Difficulty ladder (suggested): 8 routine, 12 trained, 16 expert, 20 elite.
+- For non-combat challenges, the agent narrates the result first and only rolls when the outcome is uncertain or interesting.
+- `Opposed` rolls are reserved for head-to-head contests: chases, duels, hack-vs-ICE, bargaining.
