@@ -77,6 +77,48 @@ Every runner has **six stats**, each rated **1–6** (3 is human average, 5 is p
 
 **Stat-aware checks** use `scripts/dice.py red-check --stat <stat> --skill <skill> --modifier <mod>`. The script treats stat and skill as separate numbers; the agent picks the relevant pair from the player's sheet based on the fiction.
 
+## XP & Leveling
+
+The agent tracks experience in the background and awards XP automatically when in-fiction conditions are met. XP and level live in `session.json > player_character` and in the player dossier under `characters/<player-slug>.md`.
+
+### Awarding XP (background bookkeeping)
+
+The agent awards XP in the background — no prompt to the player, no choice at award time. Typical awards are **1–3 XP** per trigger:
+
+- Survived a major scrape (combat, chase, ambush, cyberware rejection, extraction under fire)
+- Completed or partially completed a job
+- Uncovered a major lead or turned a hidden system inside out
+- Made a risky call that the fiction rewarded
+- Had a meaningful character moment (confronted a trauma, broke a bad habit, kept faith with a contact)
+- Took heat for the crew or paid a real cost (lost a contact, took a black-market debuff, spent street cred)
+
+The agent writes XP to the dossier immediately after the trigger, with a one-line reason (e.g. `+2 XP — survived the Morrow Array ambush`). The agent does not surface the running total to the player mid-scene unless the player asks; XP is bookkeeping, not narration.
+
+### Level-Up Flow
+
+- **Level up at 10 XP.** When a level-up fires, the agent announces it in the fiction (the runner feels sharper, faster, more present) and writes the new level to the dossier and `session.json`.
+- On level-up, the player chooses **one of three paths**:
+  1. **Four background-relevant skills.** The agent proposes four `STAT/Skill` paths that fit the runner's concept and current gaps (e.g. for a ripperdoc: `TEK/Surgery`, `TEK/Diagnose`, `INT/Pharma`, `BOD/Dexterity`). The player picks one.
+  2. **Four random skills.** The agent invents four wildly different skill paths the runner has never hinted at (e.g. `CHA/Stand-up Comedy`, `REF/Drone Racing`, `TEK/Black ICE Poetry`, `COO/Quick Draw`). The player picks one.
+  3. **Direct request.** The player names the skill they want. The agent either grants it as-is, **simplifies it to a weaker version** if it is too powerful for the current fiction, or **downgrades it to a neighboring skill** if the request is just out of bounds. The agent must explain the simplification in-character so the player understands the cost.
+- New skills start at **rank 1**. A skill the player already has can be **upgraded**: in that case the rank may exceed the typical 0–4 ceiling, up to **rank 6** for a deeply specialized runner. Treat **+1 rank per level-up for the same skill** as the rule.
+- The agent never grants a rank that would trivialize the fiction. If a request would, simplify instead of rubber-stamping it.
+
+### Skill Dossier Entry (player or NPC)
+
+Every skill on a character — player or NPC — must be documented in the entity's markdown dossier with a **Skill Entry** block of the following shape. The agent writes or updates the entry every time a skill is gained, upgraded, simplified, or limited:
+
+```markdown
+### <STAT/Skill Name> (Rank N)
+
+- **Description:** one or two sentences on what the skill lets the runner do
+- **Frequency:** when it can be used (e.g. "once per session", "once per scene", "at-will", "1/day", "passive")
+- **Effect:** the precise mechanical or fictional effect (bonus to rolls, narrative right, damage, range, area, duration)
+- **Limitations:** costs, drawbacks, conditions for failure, cyberware dependencies, social consequences, gear requirements
+```
+
+A skill without all four fields is incomplete. The agent backfills missing fields the next time the skill is touched in play.
+
 ## Ad Crawls
 
 Cyberpunk cities scream at you. When the player passes a surface that could carry advertising — a wall screen, transit holo, sky-bike banner, restroom kiosk, drone float, sub-channel crawl, graffiti projector, or a stranger's chrome forearm — the agent should invent a fresh ad crawl in the fiction.
@@ -137,7 +179,8 @@ Cyberpunk cities scream at you. When the player passes a surface that could carr
    - `story.md` with the narrative summary
    - `timeline.md` with concise chronological beats
    - `characters/`, `locations/`, or `events/` with any changed dossier state
-   - `session.json` for clocks, leads, heat, objectives, and unresolved threats
+   - `session.json` for clocks, leads, heat, objectives, unresolved threats, **and player XP/level**
+   - Any new or changed skill on a player or NPC must be written into that entity's dossier as a **Skill Entry** (Description / Frequency / Effect / Limitations)
 
 7. End each major turn with a clear game-facing handoff.
    Summarize what changed, what the player can do next, and any clocks or consequences now in motion.
@@ -202,3 +245,5 @@ The skill is working correctly when all of the following are true:
 - dice rolls produce structured output the agent can cite during play
 - the current scene's new facts are written back into the active session archive
 - no scene content was produced by a random draw from the knowledge database; every character, location, gig, rumor, complication, and name was invented by the agent
+- XP is tracked in the player dossier and `session.json`; a level-up fires at 10 XP and follows the three-path choice rule
+- every skill on a player or NPC is documented in its dossier with Description, Frequency, Effect, and Limitations
