@@ -80,11 +80,14 @@ Hermes skills do not currently provide a documented way for third-party skills t
 
 ## Core Scripts
 
-- `bootstrap_sources.py`: builds or refreshes the cyberpunk knowledge database
-- `db_search.py`: searches the knowledge database and optional session files
-- `scene_oracle.py`: generates gigs, complications, ads, rumors, and names
-- `dice.py`: rolls generic dice and cyberpunk-style checks
-- `session_manager.py`: creates, lists, inspects, and updates isolated play sessions, including dossier docs and roll logs
+The skill exposes a small set of one-shot Python helpers. **There is no session controller script** — Hermes reads and writes the active session's files directly with its own file tools, treating the session folder as the API.
+
+- `bootstrap_sources.py` — builds or refreshes the cyberpunk knowledge database
+- `db_search.py` — searches the knowledge database for tone, texture, and reference material
+- `dice.py` — rolls generic dice and cyberpunk-style action checks
+- `cyberpunk_lib.py` — shared utilities used by the scripts above
+
+The session files themselves (under `~/.hermes/cyberpunk-runner/sessions/<session-id>/`) are the interface, and the agent drives them with the Hermes file tools.
 
 ## Data Model
 
@@ -94,7 +97,7 @@ Each play session contains:
 - `story.md`: running fiction log
 - `timeline.md`: concise event chronology
 - `gm-notes.md`: hidden planning notes and stakes
-- `characters/`: one markdown dossier per important character
+- `characters/`: one JSON dossier per important character (player and NPCs); schema in `templates/character.json`
 - `locations/`: one markdown dossier per important location
 - `events/`: one markdown dossier per major event or mission beat
 - `rolls/`: optional dice result logs

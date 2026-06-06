@@ -94,13 +94,30 @@ The `player_character` block is the agent's reference for every stat-aware `red-
 
 ## Dossier Conventions
 
-Character, location, and event files are markdown so Hermes can read and edit them naturally.
+Each entity gets its own file in the matching subfolder. **Character files are JSON**; location and event files are markdown. The character JSON is the canonical sheet, and `session.json > player_character` is a denormalized mirror of the player's character JSON so the agent can look up stats without re-parsing the file.
 
-Use one file per important entity with a slug filename such as:
+### Character files (`characters/<slug>.json`)
 
-- `characters/rook-vale.md`
-- `locations/glass-canal-night-market.md`
-- `events/clinic-extraction-goes-loud.md`
+- One JSON file per important character (player and NPCs).
+- Build the file from `templates/character.json` so every field is present and `skill_entries` lines up with the `skills` array.
+- `slug` should be a stable, file-safe identifier (e.g. `rook-vale`, not `Rook Vale!`).
+- The full schema (stats, derived, skills, cyberware, `xp_log`, `skill_entries`, hooks, secrets, relationship notes) lives in `templates/character.json`; treat it as the contract.
+- `characters/index.md` is a short markdown roll-call of every character file, kept in sync as characters are created or retired.
+
+### Location and event files (markdown)
+
+- `locations/<slug>.md` — neighborhood, corp HQ, club, transit line, hideout — anything with a name.
+- `events/<slug>.md` — a mission beat, a heist, a betrayal, a public incident.
+- Use the matching starter template (`templates/location.md`, `templates/event.md`) and fill it in.
+
+### Player-character mirroring
+
+When the player sheet changes (HP, evasion, composure, street cred, level, XP, skills, `skill_entries`, status), update **both**:
+
+- `characters/<player-slug>.json` — the canonical player dossier
+- `session.json > player_character` — the denormalized session-scoped view used for stat-aware checks and quick lookups
+
+The two files must agree at all times. If they drift, prefer the player JSON as the source of truth and rewrite the `player_character` block from it.
 
 ## Isolation Boundary
 

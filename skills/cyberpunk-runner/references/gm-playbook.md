@@ -67,7 +67,7 @@ Drop a one-line brand mention (skip the template) during chases, firefights, and
 
 ## XP Triggers (background awards)
 
-Award 1–3 XP in the background — write to the dossier and `session.json`, do not pause the scene to ask. Common triggers:
+Award 1–3 XP in the background — write to `characters/<player-slug>.json` (the canonical sheet) and `session.json`, do not pause the scene to ask. Common triggers:
 
 - Survived a major scrape (combat, chase, ambush, cyberware rejection, extraction under fire) — +1 to +3
 - Completed or partially completed a job — +2 to +3
@@ -88,6 +88,6 @@ When XP hits 10, the agent stops the action just long enough to:
    - **Four background-relevant skills** — agent proposes four, player picks one.
    - **Four random skills** — agent invents four wildly different paths, player picks one.
    - **Direct request** — player names a skill; agent grants as-is, simplifies to a weaker version, or downgrades to a neighboring skill. Always explain the simplification in-character.
-4. Write the new skill (or upgraded rank) into the player dossier and `skill_entries` with full Description, Frequency, Effect, and Limitations. If the skill was simplified or limited, that is part of the entry.
+4. Write the new skill (or upgraded rank) into `characters/<player-slug>.json` and the matching entry into `skill_entries` with full Description, Frequency, Effect, and Limitations. If the skill was simplified or limited, that is part of the entry. Mirror the same `skill_entries` object into `session.json > player_character.skill_entries` so the dossier and the session state stay aligned.
 
 A skill the player already has can be upgraded past the typical 0–4 ceiling up to rank 6; treat **+1 rank per level-up for the same skill** as the rule, and never grant a rank that would trivialize the fiction.
