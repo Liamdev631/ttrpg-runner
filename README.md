@@ -15,7 +15,8 @@ It is packaged to work as either:
 - Standard-library Python tools for setup, database search, scene oracles, dice rolls, and session management
 - A local searchable SQLite knowledge base built from bundled public/open cyberpunk data packs
 - An optional internet enrichment pass that pulls public genre summaries from Wikipedia
-- Persistent per-session story storage with markdown dossiers for characters, locations, events, rolls, and story logs
+- Persistent per-session story storage with JSON character dossiers plus markdown location, event, roll, and story logs
+- Bootstrap guidance for solo play or multi-player Discord sessions, including per-user character mapping and Discord troubleshooting notes
 - Session isolation rules so each invocation starts a fresh play archive unless the user explicitly resumes one
 
 ## Hermes Features Used
@@ -74,6 +75,7 @@ The skill is intentionally session-centric:
 
 - A normal `/cyberpunk-runner <prompt>` call creates a new play session folder
 - The session stores its own narrative state and dossiers under `~/.hermes/cyberpunk-runner/sessions/<session-id>/`
+- In Discord, the skill can map multiple human players to their own character files inside the same session
 - The agent is instructed to use only the active session's files unless the player explicitly asks to resume a prior session
 
 Hermes skills do not currently provide a documented way for third-party skills to open a brand new Hermes chat thread programmatically. To stay compliant with Hermes as documented, this skill implements a fresh isolated *play session* on invocation, with dedicated storage and strict context-scoping rules.
@@ -93,11 +95,11 @@ The session files themselves (under `~/.hermes/cyberpunk-runner/sessions/<sessio
 
 Each play session contains:
 
-- `session.json`: metadata, clocks, open threads, and current situation
+- `session.json`: metadata, clocks, open threads, Discord user registry, party ties, and current situation
 - `story.md`: running fiction log
 - `timeline.md`: concise event chronology
 - `gm-notes.md`: hidden planning notes and stakes
-- `characters/`: one JSON dossier per important character (player and NPCs); schema in `templates/character.json`
+- `characters/`: one JSON dossier per important character (players and NPCs); schema in `templates/character.json`
 - `locations/`: one markdown dossier per important location
 - `events/`: one markdown dossier per major event or mission beat
 - `rolls/`: optional dice result logs

@@ -45,6 +45,7 @@ Use this skill when the player wants to:
 - Hermes itself reads and writes the active session's files directly with its file tools. There is no intermediate controller script — the skill is a map of folders and files, and Hermes drives the game by editing them.
 - The Python helper scripts (`bootstrap_sources.py`, `db_search.py`, `dice.py`) are still available for one-shot operations like building the knowledge base, searching reference material, and rolling dice. The session files themselves are Hermes's responsibility.
 - Keep the fiction system-agnostic and genre-faithful rather than quoting proprietary rulebooks.
+- Support both solo play and multi-player play. If multiple Discord users are in the session, track exactly which human maps to which runner by Discord user ID, username, and character slug, and never blur those identities during play.
 
 ## Organic Creation Principle
 
@@ -53,6 +54,20 @@ Use this skill when the player wants to:
 - If the player asks for inspiration, the agent may *consult* entries via `db_search.py` to study tone or pattern, but the final scene content must still be authored fresh, not copied verbatim.
 - Every story must be **unique and unpredictable**: vary the stakes, the betrayals, the geography, the cast, and the tone across sessions, and avoid reusing the same job templates, faction patterns, or stock twists session after session.
 - Prefer the player's own contributions over generic cyberpunk tropes: weave their character concept, the requested tone, and any details they offered into the invented material so the campaign feels personal, not procedural.
+
+## Discord Multiplayer Bootstrap
+
+When the game is being run in Discord with multiple humans taking turns, bootstrap the room deliberately instead of treating the whole channel like a single player.
+
+- Ask up front how many players are in the session. Even if only one person invoked the skill, do not assume solo play if the prompt suggests a group game.
+- Build the crew one player at a time. For each Discord participant, identify their Discord user ID and username from the available chat metadata, confirm which runner belongs to them, and keep that mapping in `session.json`.
+- Stay with one player until that player says their starting character is right. That can take multiple back-and-forth turns: concept, stats, starting skills, gear, hooks, and final approval. Only then move to the next player.
+- Once every player has confirmed their runner, if there is more than one player, ask how the crew knows each other before the opening scene. Offer suggestions like: old friends from the same block, former squadmates, ex-lovers with unfinished business, a standing edge-runner crew, strangers forced together for a job, or a fixer-built team meeting for the first time.
+- During live Discord play, always identify the current speaker before acting on a request. The agent may use Discord user IDs and usernames to do this, but it still needs to keep the player-to-character mapping current in the session files.
+- Print a short troubleshooting note during bootstrap:
+  - If the agent is ignoring a player, verify that player's Discord user ID is present in the configured list of valid users.
+  - Recommend adding the current game channel to `discord.free_response_channels` so players do not need to `@mention` the bot every turn.
+  - Explain that `discord.free_response_channels` can be left off or removed if the group wants stretches of player-to-player chatter without the bot listening to every line.
 
 ## Player Stat System
 
@@ -91,7 +106,7 @@ The street is brutal. The fiction is brutal. **Players do not have gear they do 
 
 ## XP & Leveling
 
-The agent tracks experience in the background and awards XP automatically when in-fiction conditions are met. XP and level live in `session.json > player_character` and in the player dossier at `characters/<player-slug>.json`.
+The agent tracks experience in the background and awards XP automatically when in-fiction conditions are met. Each runner's XP and level live in that runner's dossier at `characters/<player-slug>.json` and in the matching mirror entry under `session.json > player_characters`.
 
 ### Awarding XP (background bookkeeping)
 
@@ -186,13 +201,13 @@ Configured `cyberpunk_runner.base_dir` (default `~/.hermes/cyberpunk-runner`) is
     source_state.json
   sessions/
     <session-id>/
-      session.json                        <- structured state (clocks, threads, factions, leads, ad_hooks, notes, player_character with XP/level)
+      session.json                        <- structured state (clocks, threads, factions, leads, ad_hooks, notes, Discord player registry, party ties, player_characters with XP/level)
       story.md                            <- running narrative recap
       timeline.md                         <- bullet chronology, one line per beat
       gm-notes.md                         <- hidden planning notes, stakes, hooks
       characters/
         index.md                          <- markdown roll-call of every character file
-        <player-slug>.json                <- the runner's sheet (stats, skills, XP, cyberware, hooks, secrets)
+        <player-slug>.json                <- one JSON file per player character
         <npc-slug>.json                   <- one JSON file per important NPC
       locations/
         index.md
@@ -209,11 +224,11 @@ Configured `cyberpunk_runner.base_dir` (default `~/.hermes/cyberpunk-runner`) is
 
 | File / folder | Hermes writes here | Hermes reads from here |
 | --- | --- | --- |
-| `session.json` | every state change: clocks, threads, factions, leads, ad_hooks, notes, player XP/level, skill ranks, HP/evasion/composure updates | at the start of every turn to recall current state |
+| `session.json` | every state change: clocks, threads, factions, leads, ad_hooks, notes, Discord player registry, party relationship state, player XP/level, skill ranks, HP/evasion/composure updates | at the start of every turn to recall current state and map the active Discord speaker to the right runner |
 | `story.md` | the running fiction, scene by scene | before responding, to keep narrative continuity |
 | `timeline.md` | one bullet per beat with a timestamp | to recall the order of past events |
 | `gm-notes.md` | private planning: stakes, who benefits, foreshadowing, hooks to plant | to remember what the player should not see yet |
-| `characters/<slug>.json` | NPC sheets and the player sheet: stats, derived trackers, skills, cyberware, XP/level, `skill_entries`, hooks, secrets, relationship notes | whenever a character is on-screen or about to be; the player file is canonical for stat-aware checks |
+| `characters/<slug>.json` | NPC sheets and every player sheet: stats, derived trackers, skills, cyberware, XP/level, `skill_entries`, hooks, secrets, relationship notes | whenever a character is on-screen or about to be; player files are canonical for stat-aware checks |
 | `locations/<slug>.md` | neighborhood, corp HQ, club, transit line, hideout — anything with a name | whenever the player travels to or acts inside a named place |
 | `events/<slug>.md` | a mission beat, a heist, a betrayal, a public incident | to keep the shape of long-running arcs consistent |
 | `rolls/<stamp>-<label>.json` | raw `dice.py` output, when the player asks for a log | only if the player wants to audit a roll |
@@ -230,13 +245,25 @@ When creating a new dossier, copy the matching template from `templates/` into t
 
 The full `character.json` schema (stats, derived, skills, cyberware, `xp_log`, `skill_entries`, hooks, secrets, etc.) lives in `templates/character.json`. Treat it as the canonical shape for any character — fill in every field, and keep `skill_entries` synchronized with the `skills` array.
 
-The `session.json` shape is defined in `references/session-data-model.md`; consult it whenever fields like `clocks`, `factions`, `ad_hooks`, or `player_character.xp_log` need to be added or updated. The `player_character` block in `session.json` is a denormalized mirror of `characters/<player-slug>.json`: same stats, derived trackers, skills, cyberware, level, XP, and `skill_entries`. The agent updates both files together so the session-scoped view and the per-character dossier never drift.
+The `session.json` shape is defined in `references/session-data-model.md`; consult it whenever fields like `clocks`, `factions`, `ad_hooks`, `players`, `party`, or `player_characters[*].xp_log` need to be added or updated. The `player_characters` array in `session.json` is a denormalized mirror of the player dossiers in `characters/`: same stats, derived trackers, skills, cyberware, level, XP, and `skill_entries`, plus a stable link back to each Discord user. The agent updates both sides together so the session-scoped view and the per-character dossiers never drift.
 
 ## Procedure
 
-1. **Establish the player's ask.**
-   If the user did not supply enough detail, ask for only the minimum needed: mission tone, character concept, preferred lethality, and whether they want a one-shot or campaign.
-   Draft a starting stat array (see **Player Stat System** above) and walk the player through it before play begins.
+1. **Establish the table, then bootstrap the crew.**
+   First ask whether this is a solo session or a multi-player session, and if it is multi-player ask exactly how many players are in the room. If the user did not supply enough detail, ask for only the minimum needed at the session level: mission tone, preferred lethality, and whether they want a one-shot or campaign.
+
+   If the game is happening in Discord, print a short troubleshooting note before character creation:
+   - If the agent is not responding to a specific player, that player's Discord user ID may need to be added to the configured valid-user list.
+   - Recommend adding the game channel to `discord.free_response_channels` so players do not need to `@mention` the bot every time.
+   - Mention that `discord.free_response_channels` is optional and can be disabled if the group wants player-to-player chat without the bot listening to every line.
+
+   Then build the characters one by one:
+   - Identify each player by Discord user ID and username when that metadata is available, and reserve a stable character slug for them.
+   - Ask each player for their character design in turn. Stay with that player until they are satisfied with the initial runner.
+   - Draft a starting stat array for that runner (see **Player Stat System** above), walk the player through it, and finalize starting skills, gear, hooks, and sheet details before moving on.
+   - Repeat until every player has explicitly confirmed their runner.
+
+   If there is more than one player, ask how they know each other before the story begins. Offer grounded suggestions like old friends, former coworkers, ex-gangers, estranged family, strangers assembled for a job, or a crew with one missing link who vouched for the others.
 
 2. **Resolve the base directory.**
    Use the configured `cyberpunk_runner.base_dir` if the user supplied one. Otherwise use the default `~/.hermes/cyberpunk-runner`.
@@ -255,18 +282,19 @@ The `session.json` shape is defined in `references/session-data-model.md`; consu
    Hermes manages this directly with its file tools — no controller script.
 
    - **New session.** Pick a `<session-id>` of the form `YYYYMMDD-<theme-slug>-<short-hash>` (for example `20260604-neon-ashes-a1b2c3`). Then create the folder tree above and seed the root files:
-     - `session.json` with `session_id`, `created_at`, `updated_at`, `theme`, `tone`, `player_request`, `status: "active"`, an empty `clocks` / `threads` / `factions` / `leads` / `ad_hooks` / `notes`, and a `player_character` block built from the agreed-upon stat array, skills, derived trackers, cyberware, `level: 1`, `xp: 0`, `xp_to_next_level: 10`, an empty `xp_log`, an empty `skill_entries`, and `status: "alive"`.
-     - `characters/<player-slug>.json` built from `templates/character.json`, filled with the agreed-upon stats, derived trackers, cyberware, level, XP, and an initial `skills` / `skill_entries` (one entry per starting skill, all four fields complete). Update `characters/index.md` with a `- [<player-name>](<player-slug>.json)` line.
+     - `session.json` with `session_id`, `created_at`, `updated_at`, `theme`, `tone`, `player_request`, `status: "active"`, an empty `clocks` / `threads` / `factions` / `leads` / `ad_hooks` / `notes`, a `players` array (one object per human participant with Discord user ID, username, display name if known, and `character_slug`), a `player_characters` array (one mirror object per player character with the agreed-upon stat array, skills, derived trackers, cyberware, `level: 1`, `xp: 0`, `xp_to_next_level: 10`, an empty `xp_log`, an empty `skill_entries`, and `status: "alive"`), and a `party` block capturing how the crew knows each other.
+     - One `characters/<player-slug>.json` file per player, each built from `templates/character.json`, filled with the agreed-upon stats, derived trackers, cyberware, level, XP, and an initial `skills` / `skill_entries` (one entry per starting skill, all four fields complete). Update `characters/index.md` with one `- [<player-name>](<player-slug>.json)` line per player.
      - `story.md` with a `# Story Log: <session-id>` header, the theme/tone/player-request bullets, and an `## Opening Frame` section that says `Session created. Add the opening scene here.`
      - `timeline.md` with a `# Timeline: <session-id>` header and a single bullet: `<utc-now>: Session created.`
      - `gm-notes.md` with `# GM Notes`, an empty `## Pressure` section (prompt: *who benefits if the crew fails?*), and an empty `## Hooks` section.
      - `locations/index.md`, `events/index.md`, `rolls/index.md` with one-line placeholders describing what goes in each folder.
-   - **Resume flow.** List the contents of `<base-dir>/sessions/` with the file tools, let the player pick one, then read that session's `session.json`, `story.md`, `timeline.md`, `gm-notes.md`, and any dossier files relevant to the current scene. Do not touch any other session's files.
+   - **Resume flow.** List the contents of `<base-dir>/sessions/` with the file tools, let the player pick one, then read that session's `session.json`, `story.md`, `timeline.md`, `gm-notes.md`, and any dossier files relevant to the current scene. Rebuild the current Discord user-to-character mapping from `session.json > players` before replying in-character. Do not touch any other session's files.
 
 5. **Run the game by editing the active session's files.**
    On every turn:
    - Read `session.json` first to know the current state.
    - Skim `story.md` and `timeline.md` for continuity.
+   - In Discord, identify which human just spoke by user ID / username and map them to the correct runner before narrating or updating anything.
    - Play the scene.
    - For checks, call `scripts/dice.py red-check --stat <stat> --skill <skill> --modifier <mod>` (and `opposed` when relevant). Pipe the JSON output straight into the narration or, if the player wants a log, also write it to `rolls/<utc-stamp>-<label>.json`.
    - For tone and texture, optionally call `scripts/db_search.py "<query>"` against the knowledge base. Treat results as inspiration only — never copy them into the scene.
@@ -275,9 +303,9 @@ The `session.json` shape is defined in `references/session-data-model.md`; consu
 6. **Keep every file current as the fiction evolves.**
    - Update `story.md` with the latest narrative beat.
    - Append a dated bullet to `timeline.md`.
-   - Update `session.json` for any change in `clocks`, `threads`, `factions`, `leads`, `ad_hooks`, `notes`, or `player_character` (HP, evasion, composure, street cred, XP, level, skills, status).
+   - Update `session.json` for any change in `clocks`, `threads`, `factions`, `leads`, `ad_hooks`, `notes`, `players`, `party`, or `player_characters` (HP, evasion, composure, street cred, XP, level, skills, status).
    - Update the relevant `characters/<slug>.json`, `locations/<slug>.md`, or `events/<slug>.md` whenever a fact about that entity changes, and keep the matching `index.md` in sync.
-   - When the player or an NPC gains, upgrades, simplifies, or limits a skill, write a **Skill Entry** object (Description / Frequency / Effect / Limitations) into that entity's JSON file **and** mirror it into `session.json > player_character.skill_entries` (or the NPC's record) so the dossier and the session state never drift. The player JSON is the canonical sheet; `session.json` is a denormalized view for quick lookups during play.
+   - When a player or NPC gains, upgrades, simplifies, or limits a skill, write a **Skill Entry** object (Description / Frequency / Effect / Limitations) into that entity's JSON file **and** mirror it into the matching object under `session.json > player_characters` (or the NPC's record) so the dossiers and the session state never drift. Player JSON files are canonical sheets; `session.json` is a denormalized view for quick lookups during play.
 
 7. **Close the turn with a game-facing handoff.**
    Summarize what changed, what the player can do next, and any clocks, leads, or consequences now in motion. Do not narrate bookkeeping the player did not ask for.
@@ -334,6 +362,7 @@ Use these templates when drafting or refreshing dossiers:
 - Do not replay the same mission template, faction, or twist across sessions in a way that makes the campaign feel repetitive.
 - Do not introduce a controller script for session state. The session files are the API, and Hermes writes them directly.
 - Do not let the player (or any NPC) reach for gear, cyberware, weapons, vehicles, contacts, cred, drugs, ammo, or chems that are not on the sheet. Begging, arguing, or "it just makes sense for my character" is not a pass — narrate the empty holster, the bare pocket, the contact who never owed them a thing. Inventory changes only happen through in-fiction acquisition, or through a direct, agent-confirmed bookkeeping correction (see **Gear Honesty**).
+- Do not lose track of who is speaking in Discord. Never apply one player's request, dice check, inventory, XP, or consequence to another player's character because their turns happened close together in the channel.
 
 ## Verification
 
@@ -341,10 +370,11 @@ The skill is working correctly when all of the following are true:
 
 - `<base-dir>/knowledge/cyberpunk.db` exists (built once by `bootstrap_sources.py init`).
 - The active session folder contains `session.json`, `story.md`, `timeline.md`, `gm-notes.md`, and the `characters/`, `locations/`, `events/`, `rolls/` directories.
-- `characters/<player-slug>.json` and `session.json > player_character` both carry the agreed-upon stats, derived trackers, cyberware, level, XP, and a `skill_entries` array in lockstep.
+- `session.json` contains a correct `players` registry mapping each Discord user to the right `character_slug`, plus a `party` block if the session has multiple players.
+- Every player character has a `characters/<player-slug>.json` dossier, and each of those dossiers matches its mirror object in `session.json > player_characters` for stats, derived trackers, cyberware, level, XP, and `skill_entries`.
 - Dice rolls (`dice.py`) produce structured output the agent can cite during play, and `rolls/` may contain dated JSON records.
 - The current scene's new facts are written back into the active session's files using the file tools — no separate manager script mediates the writes.
 - No scene content was produced by a random draw from the knowledge database; every character, location, gig, rumor, complication, and name was invented by the agent.
-- XP is tracked in the player JSON and `session.json`; a level-up fires at 10 XP and follows the three-path choice rule.
-- Every skill on a player or NPC is documented in its JSON file with Description, Frequency, Effect, and Limitations, and mirrored in `session.json`.
-- Every piece of gear, cyberware, weapon, vehicle, contact, cred chip, drug, ammo belt, or chem the player reaches for in the fiction is on `characters/<player-slug>.json` at the time of use. Inventory edits only happen through in-fiction acquisition or through a direct, agent-confirmed bookkeeping correction; the agent never invents inventory on the player's behalf, and the agent never lets pressure, persuasion, or "it just makes sense" override the sheet.
+- XP is tracked per runner in the player JSON files and in `session.json > player_characters`; a level-up fires at 10 XP and follows the three-path choice rule.
+- Every skill on a player or NPC is documented in its JSON file with Description, Frequency, Effect, and Limitations, and mirrored in the relevant `session.json` record.
+- Every piece of gear, cyberware, weapon, vehicle, contact, cred chip, drug, ammo belt, or chem a player reaches for in the fiction is on that player's `characters/<player-slug>.json` at the time of use. Inventory edits only happen through in-fiction acquisition or through a direct, agent-confirmed bookkeeping correction; the agent never invents inventory on a player's behalf, and the agent never lets pressure, persuasion, or "it just makes sense" override the sheet.

@@ -29,43 +29,98 @@ Each session lives under:
   "updated_at": "2026-06-04T00:00:00Z",
   "theme": "stolen biometric vault",
   "tone": "neon-noir",
-  "player_request": "Run a one-shot about a black clinic extraction.",
+  "player_request": "Run a Discord one-shot about a black clinic extraction for two runners.",
   "status": "active",
-  "player_character": {
-    "name": "Rook Vale",
-    "concept": "ex-clinic ripperdoc turned courier",
-    "stats": {
-      "BOD": 4, "REF": 4, "TEK": 3, "INT": 3, "COO": 2, "CHA": 2
+  "players": [
+    {
+      "user_id": "112233445566778899",
+      "username": "liamb",
+      "display_name": "Liam",
+      "character_slug": "rook-vale"
     },
-    "skills": [
-      {"path": "REF/Shoot", "rank": 3},
-      {"path": "TEK/Ripperdoc", "rank": 2},
-      {"path": "CHA/Persuade", "rank": 1}
-    ],
-    "derived": {
-      "hp": 8,
-      "evasion": 4,
-      "composure": 2,
-      "street_cred": 0
+    {
+      "user_id": "998877665544332211",
+      "username": "case",
+      "display_name": "Case",
+      "character_slug": "nyx-sable"
+    }
+  ],
+  "player_characters": [
+    {
+      "user_id": "112233445566778899",
+      "username": "liamb",
+      "slug": "rook-vale",
+      "name": "Rook Vale",
+      "concept": "ex-clinic ripperdoc turned courier",
+      "stats": {
+        "BOD": 4, "REF": 4, "TEK": 3, "INT": 3, "COO": 2, "CHA": 2
+      },
+      "skills": [
+        {"path": "REF/Shoot", "rank": 3},
+        {"path": "TEK/Ripperdoc", "rank": 2},
+        {"path": "CHA/Persuade", "rank": 1}
+      ],
+      "derived": {
+        "hp": 8,
+        "evasion": 4,
+        "composure": 2,
+        "street_cred": 0
+      },
+      "cyberware": ["Mantis blades", "Subdermal armor (light)", "Kiroshi optics mk.3"],
+      "level": 1,
+      "xp": 0,
+      "xp_to_next_level": 10,
+      "xp_log": [
+        {"amount": 2, "reason": "Survived the Morrow Array ambush", "at": "2026-06-04T01:15:00Z"}
+      ],
+      "skill_entries": [
+        {
+          "path": "REF/Shoot",
+          "rank": 3,
+          "description": "Fast, accurate fire with sidearms, SMGs, and assault rifles.",
+          "frequency": "at-will",
+          "effect": "+3 to all REF/Shoot red-checks; may fire twice in a single Action Phase at rank 3+.",
+          "limitations": "Requires a readied ranged weapon. Suppressive fire or called shots still demand a roll."
+        }
+      ],
+      "status": "alive"
     },
-    "cyberware": ["Mantis blades", "Subdermal armor (light)", "Kiroshi optics mk.3"],
-    "level": 1,
-    "xp": 0,
-    "xp_to_next_level": 10,
-    "xp_log": [
-      {"amount": 2, "reason": "Survived the Morrow Array ambush", "at": "2026-06-04T01:15:00Z"}
-    ],
-    "skill_entries": [
-      {
-        "path": "REF/Shoot",
-        "rank": 3,
-        "description": "Fast, accurate fire with sidearms, SMGs, and assault rifles.",
-        "frequency": "at-will",
-        "effect": "+3 to all REF/Shoot red-checks; may fire twice in a single Action Phase at rank 3+.",
-        "limitations": "Requires a readied ranged weapon. Suppressive fire or called shots still demand a roll."
-      }
-    ],
-    "status": "alive"
+    {
+      "user_id": "998877665544332211",
+      "username": "case",
+      "slug": "nyx-sable",
+      "name": "Nyx Sable",
+      "concept": "burned netrunner with a talent for synthetic identities",
+      "stats": {
+        "BOD": 2, "REF": 3, "TEK": 5, "INT": 4, "COO": 3, "CHA": 2
+      },
+      "skills": [
+        {"path": "TEK/Netrun", "rank": 3},
+        {"path": "INT/Research", "rank": 2},
+        {"path": "COO/Stealth", "rank": 1}
+      ],
+      "derived": {
+        "hp": 6,
+        "evasion": 3,
+        "composure": 3,
+        "street_cred": 0
+      },
+      "cyberware": ["Deck interface plugs", "Ghost-mask subdermals"],
+      "level": 1,
+      "xp": 0,
+      "xp_to_next_level": 10,
+      "xp_log": [],
+      "skill_entries": [],
+      "status": "alive"
+    }
+  ],
+  "party": {
+    "relationship_model": "former crew",
+    "how_they_met": "Rook once patched Nyx up after a botched data theft, and they have kept each other alive ever since.",
+    "shared_hooks": [
+      "Both owe favors to the same fixer",
+      "Both distrust Morrow Array"
+    ]
   },
   "clocks": [
     {"name": "Clinic lockdown", "value": 1, "max": 6}
@@ -88,13 +143,13 @@ Each session lives under:
 }
 ```
 
-The `player_character` block is the agent's reference for every stat-aware `red-check` — pick the stat and skill by `path` (e.g. `REF/Shoot`) and pass both numbers to `dice.py`. The `ad_hooks` array tracks brand names, contact numbers, and addresses the agent has dropped into ad crawls so the player can chase them later.
+The `players` array is the human-participant registry. Use it to map Discord user IDs and usernames to stable `character_slug` values before applying any request, consequence, inventory use, XP award, or dice check. The `player_characters` array is the agent's quick-reference mirror for stat-aware `red-check` calls — pick the right runner first, then pick the stat and skill by `path` (e.g. `REF/Shoot`) and pass both numbers to `dice.py`. The `ad_hooks` array tracks brand names, contact numbers, and addresses the agent has dropped into ad crawls so the players can chase them later.
 
-`xp` is awarded in the background by the agent; when it reaches `xp_to_next_level` (default `10`) a level-up fires. The agent then updates `level`, resets `xp`, and lets the player pick from the three-path choice (background skills, random skills, or a direct request — see SKILL.md "XP & Leveling"). Every skill on the player or any NPC must also live in `skill_entries` with `description`, `frequency`, `effect`, and `limitations` so the dossier and the JSON stay in lockstep.
+`xp` is awarded in the background by the agent on a per-runner basis; when a runner reaches `xp_to_next_level` (default `10`) a level-up fires for that specific character. The agent then updates `level`, resets `xp`, and lets that player pick from the three-path choice (background skills, random skills, or a direct request — see SKILL.md "XP & Leveling"). Every skill on any player or NPC must also live in `skill_entries` with `description`, `frequency`, `effect`, and `limitations` so the dossiers and the JSON stay in lockstep.
 
 ## Dossier Conventions
 
-Each entity gets its own file in the matching subfolder. **Character files are JSON**; location and event files are markdown. The character JSON is the canonical sheet, and `session.json > player_character` is a denormalized mirror of the player's character JSON so the agent can look up stats without re-parsing the file.
+Each entity gets its own file in the matching subfolder. **Character files are JSON**; location and event files are markdown. Character JSON files are the canonical sheets, and `session.json > player_characters` is a denormalized mirror of the player-character dossiers so the agent can look up stats without re-parsing the files.
 
 ### Character files (`characters/<slug>.json`)
 
@@ -103,6 +158,7 @@ Each entity gets its own file in the matching subfolder. **Character files are J
 - `slug` should be a stable, file-safe identifier (e.g. `rook-vale`, not `Rook Vale!`).
 - The full schema (stats, derived, skills, cyberware, `xp_log`, `skill_entries`, hooks, secrets, relationship notes) lives in `templates/character.json`; treat it as the contract.
 - `characters/index.md` is a short markdown roll-call of every character file, kept in sync as characters are created or retired.
+- If the character belongs to a Discord player, `session.json > players` should also contain that player's `user_id`, `username`, and `character_slug`.
 
 ### Location and event files (markdown)
 
@@ -112,12 +168,12 @@ Each entity gets its own file in the matching subfolder. **Character files are J
 
 ### Player-character mirroring
 
-When the player sheet changes (HP, evasion, composure, street cred, level, XP, skills, `skill_entries`, status), update **both**:
+When a player-character sheet changes (HP, evasion, composure, street cred, level, XP, skills, `skill_entries`, status), update **both**:
 
 - `characters/<player-slug>.json` — the canonical player dossier
-- `session.json > player_character` — the denormalized session-scoped view used for stat-aware checks and quick lookups
+- the matching object in `session.json > player_characters` — the denormalized session-scoped view used for stat-aware checks and quick lookups
 
-The two files must agree at all times. If they drift, prefer the player JSON as the source of truth and rewrite the `player_character` block from it.
+The two representations must agree at all times. If they drift, prefer the player JSON as the source of truth and rewrite the matching `player_characters` entry from it. In multi-player Discord sessions, also verify that `session.json > players` still points the correct `user_id` at the correct `character_slug`.
 
 ## Isolation Boundary
 
