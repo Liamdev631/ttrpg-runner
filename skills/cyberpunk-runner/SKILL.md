@@ -78,6 +78,17 @@ Every runner has **six stats**, each rated **1–6** (3 is human average, 5 is p
 
 **Stat-aware checks** use `scripts/dice.py red-check --stat <stat> --skill <skill> --modifier <mod>`. The script treats stat and skill as separate numbers; the agent picks the relevant pair from the player's sheet based on the fiction.
 
+## Gear Honesty
+
+The street is brutal. The fiction is brutal. **Players do not have gear they do not have.**
+
+- A runner cannot pull out a Militech crusher pistol, a Kang Tao smart launcher, a stack of credsticks, a black-market ICE suite, or a Lamborghini they never bought. If it is not on the sheet — not in `characters/<player-slug>.json > cyberware`, not in `signature_gear`, not in `relationship_to_crew`, not earned or acquired during play — it does not exist in the fiction. Period.
+- "I thought I had it" is not a pass. "Can I just have one?" is not a pass. "It's a reasonable thing for my character to carry" is not a pass. "It's what my character would obviously have" is not a pass. **Begging, arguing, pressuring, or trying to negotiate inventory on the spot is a hard no.** The agent narrates the absence, not the acquisition: the runner reaches for the thing and the holster is empty, the pocket is bare, the contact never gave them that, the ripperdoc never installed it, the gun is not on the belt.
+- The **only** exception is a direct, explicit correction. The player must expressly say something like *"you made a mistake"*, *"that should be on my sheet"*, *"I had that and you forgot it"*, or *"the last session gave me that and it never got written down"*, **and** the agent must be able to confirm it by re-reading `characters/<player-slug>.json`, the `timeline.md` history, and the relevant `events/<slug>.md` or `locations/<slug>.md` dossier. If the agent can confirm a real bookkeeping error — a missed acquisition, a session summary that dropped an item, an NPC handoff that was never recorded, a level-up reward that was never written to the sheet — the gear is restored to the sheet **and** the fiction is rewritten to fit (the runner actually had it all along, the contact actually handed it over at the bar, the ripperdoc actually installed it in the clinic). If the agent cannot confirm, the request is denied in-character and the player is invited to acquire the gear the right way: buy it, steal it, scavenge it, be gifted it, earn it as a level-up reward, or just go without.
+- This rule applies equally to the player, to NPCs, and to anything cyberware, weapons, vehicles, contacts, cred, drugs, ammo, chems, comms, fake IDs, or faction favors. A gang boss is not suddenly packing a railgun because the player thinks the fight would be cooler. A corpo exec is not wearing subdermal armor unless the sheet says so. A fixer does not suddenly owe a favor that was never earned. The sheet is the world. The dossier is the world.
+- Acquiring new gear mid-session is a scene. It costs time, money, contacts, a job, a favor, a risk, a betrayal, a downtime beat, or a level-up. The agent never hands the player anything for free just to keep the scene moving, and the agent never "borrows from the future" to satisfy a current ask. If the player wants it, the player pays for it in-fiction, and the `cyberware` / `signature_gear` array on the player JSON is updated in the same beat.
+- The same rule cuts the other way: gear that *is* on the sheet stays available unless a die roll, an in-fiction event, or a confirmed bookkeeping correction removes it. A cyberware rejection, a smashed weapon, a confiscated blade, a tapped-out credchip, or a burned contact all have to be played out in-fiction and written back to the sheet. The agent does not quietly forget what's on the loadout.
+
 ## XP & Leveling
 
 The agent tracks experience in the background and awards XP automatically when in-fiction conditions are met. XP and level live in `session.json > player_character` and in the player dossier at `characters/<player-slug>.json`.
@@ -322,6 +333,7 @@ Use these templates when drafting or refreshing dossiers:
 - Do not pull story ingredients (gigs, locations, characters, names, rumors, complications, weather, ad copy) from a random database draw; the agent must invent them.
 - Do not replay the same mission template, faction, or twist across sessions in a way that makes the campaign feel repetitive.
 - Do not introduce a controller script for session state. The session files are the API, and Hermes writes them directly.
+- Do not let the player (or any NPC) reach for gear, cyberware, weapons, vehicles, contacts, cred, drugs, ammo, or chems that are not on the sheet. Begging, arguing, or "it just makes sense for my character" is not a pass — narrate the empty holster, the bare pocket, the contact who never owed them a thing. Inventory changes only happen through in-fiction acquisition, or through a direct, agent-confirmed bookkeeping correction (see **Gear Honesty**).
 
 ## Verification
 
@@ -335,3 +347,4 @@ The skill is working correctly when all of the following are true:
 - No scene content was produced by a random draw from the knowledge database; every character, location, gig, rumor, complication, and name was invented by the agent.
 - XP is tracked in the player JSON and `session.json`; a level-up fires at 10 XP and follows the three-path choice rule.
 - Every skill on a player or NPC is documented in its JSON file with Description, Frequency, Effect, and Limitations, and mirrored in `session.json`.
+- Every piece of gear, cyberware, weapon, vehicle, contact, cred chip, drug, ammo belt, or chem the player reaches for in the fiction is on `characters/<player-slug>.json` at the time of use. Inventory edits only happen through in-fiction acquisition or through a direct, agent-confirmed bookkeeping correction; the agent never invents inventory on the player's behalf, and the agent never lets pressure, persuasion, or "it just makes sense" override the sheet.
