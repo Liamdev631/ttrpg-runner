@@ -57,6 +57,15 @@ Suggested resiliences:
 - Use `||...||` spoilers for hidden identities, Hemalurgic secrets, and unseen manipulations.
 - Render dice pools, metal charges, and character sheets as fenced code blocks.
 
+## Time Manipulation And Turn Order
+
+The setting canonically supports time bubbles via bendalloy (speeds up the Allomancer) and cadmium (slows the Allomancer). When a player activates one of these abilities, the fair-rotation turn order from the main `SKILL.md` Multiplayer Turn Management section is suspended for the duration of the bubble.
+
+- A speed bubble (bendalloy burning) gives the players inside the bubble a few additional actions before the bubble falls and normal turn order resumes.
+- A slow bubble (cadmium burning) gives players outside the bubble a few additional actions, since they can act with far less resistance from the slowed party.
+- The GM decides how many bonus turns fit the scene's stakes and the bubble's remaining charges. Cross-check charge cost and bubble duration against the `references/Base Game/Magic/Allomancy.md` and `Metals.md` rules.
+- When the bubble drops, return to standard turn order with the same explicit `> **Up next: <player name>**` handoff.
+
 ## Pack References
 - `references/era-rules.md`
 - `references/gameplay-loop.md`

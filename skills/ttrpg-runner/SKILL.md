@@ -37,22 +37,23 @@ If the requested game is outside that list, say that any TTRPG is still possible
 
 ## Flavor Pack Loading Rules
 
-These rules are mandatory and exist to stop cross-setting contamination.
+These rules are mandatory. They exist to stop cross-setting contamination while still allowing intentional crossovers of two native packs.
 
 - Determine the requested setting before you worldbuild. If the player has not named a setting, ask.
-- If the setting matches one native pack, load only `flavorpacks/<pack>/PACK.md` for that pack.
-- Only read deeper pack references from the same pack, and only when they are actually needed.
-- Never read, quote, or blend material from any other pack during that session.
-- If the player says `cyberpunk`, do not load `pokemon`. If they say `pokemon`, do not load `dnd`. One pack only.
-- If the player changes settings mid-conversation, stop and confirm whether they want to abandon the current session and start a new one.
-- Unsupported settings run in generic mode. Do not load native-pack reference docs in generic mode.
-- If the player wishes to merge two settings, explain that this leaves native-pack mode. Stay in generic unsupported mode unless the user explicitly wants a custom crossover session.
+- If the player names a single native setting, load only `flavorpacks/<pack>/PACK.md` for that pack. Single-setting play is single-pack.
+- If the player explicitly names a crossover of two native settings, load BOTH `flavorpacks/<pack>/PACK.md` files, record both pack names in `session.json`, and treat the session as a native crossover. Each pack keeps its own rules, tone, and reference tree; the player and GM blend them at the table. Do not silently demote a native crossover to generic mode.
+- When a crossover has two systems that conflict (stat blocks, magic systems, tech trees, damage scales, progression, etc.), the GM must ask the player how to resolve the conflict before worldbuilding. Do not pick silently. Examples: "Do we use the `cyberpunk` stat block or the `pokemon` stat block?", "Which magic/tech system applies, and how do the other system's powers map onto it?", "How does damage scale across both?", "How does progression work?". Record the player's answers in `session.json` and stick to them for the whole session.
+- Only read deeper pack references from a pack that is active in the current session. A pack that is not loaded in this session must never be consulted.
+- Within an active pack, only read deeper references from that same pack. A `cyberpunk` reference is not a valid source for a `pokemon` beat and vice versa, even in a crossover; each pack's own rules and tone stay internally consistent.
+- If the player says `cyberpunk` and nothing else, do not load `pokemon`. If the player says `cyberpunk + pokemon` (or any other explicit crossover), load both.
+- If the player changes settings mid-conversation, stop and confirm whether they want to abandon the current session and start a new one, or shift the current session into a new single-pack or crossover mode.
+- A crossover that includes a non-native setting runs in generic mode for the unsupported portion. Do not load native-pack reference docs in generic mode, and do not blend native-pack docs into a generic session.
 
 ## When to Use
 
 Use this skill when the player wants to:
 
-- start a new one-shot or campaign in a native pack or in a generic unsupported setting
+- start a new one-shot or campaign in a native pack, in a native crossover of two packs, or in a generic unsupported setting
 - roll dice or resolve checks during play
 - keep persistent story records for the current session only
 - resume a previously saved session by explicit request
@@ -139,16 +140,17 @@ Configured `ttrpg_runner.base_dir` (default `~/.hermes/ttrpg-runner`) is the roo
    When you walk the player through character creation, propose at least one suggested initial loadout (starting gear, resources, and any setting-specific kits such as Mistborn metals, Cyberpunk cyberware, or DND 5e starting equipment) and let the player accept, modify, or swap it. Surface this offer before the character sheet is locked so the player always has concrete starting options on the table.
 
 2. Resolve native support.
-   If the setting is `cyberpunk`, `dnd`, `mistborn`, `pokemon`, or `expanse`, say it is natively supported and load only that pack's `PACK.md`.
-   If it is anything else, say the game is still possible with reduced features and stay in generic mode.
+   If the setting is a single native pack (`cyberpunk`, `dnd`, `mistborn`, `pokemon`, or `expanse`), say it is natively supported and load that pack's `PACK.md`.
+   If the setting is an explicit crossover of two native packs, say both are natively supported, load both `PACK.md` files, and treat the session as a native crossover. Only ask the `mistborn` era question if `mistborn` is one of the active packs.
+   If it is anything else (a non-native setting, or a crossover involving a non-native setting), say the game is still possible with reduced features and stay in generic mode.
 
 3. Resolve the base directory.
    Use configured `ttrpg_runner.base_dir` if supplied. Otherwise use `~/.hermes/ttrpg-runner`.
 
 4. Load native-pack references only when needed.
-   For native packs, read only the active pack's docs.
-   Start with `flavorpacks/<pack>/PACK.md`, then open deeper markdown files from the same pack only when the current turn actually needs them.
-   If the active pack is `mistborn`, read `flavorpacks/mistborn/references/era-rules.md` immediately after `PACK.md` and before opening imported source files.
+   For each active pack, read only that pack's docs.
+   Start with `flavorpacks/<pack>/PACK.md` for every active pack, then open deeper markdown files from the same pack only when the current turn actually needs them.
+   If `mistborn` is one of the active packs, read `flavorpacks/mistborn/references/era-rules.md` immediately after `mistborn/PACK.md` and before opening imported source files.
    Also load `references/discord-formatting.md` once per session so player-facing messages render with Discord-native markdown.
 
 5. Create or resume a session by hand.
@@ -161,9 +163,9 @@ Configured `ttrpg_runner.base_dir` (default `~/.hermes/ttrpg-runner`) is the roo
    Always store:
 
    - `game`: the human-facing name the player asked for
-   - `flavor_pack`: the active native pack name, or `null` for unsupported games
+   - `flavor_packs`: a list of active native pack names (one entry for single-pack, two entries for a native crossover), or `null` for unsupported games
    - `support_level`: `native` or `reduced`
-   - `mistborn_era`: `era1` or `era2` when the active pack is `mistborn`; otherwise `null`
+   - `mistborn_era`: `era1` or `era2` when `mistborn` is one of the active packs; otherwise `null`
 
 7. Run the game by editing the active session's files.
    On every turn:
@@ -189,7 +191,19 @@ These rules are non-negotiable.
 - Never quote, paraphrase, or carry over prior-session content into a fresh session.
 - The active session directory is the only authoritative memory for the current run.
 - A native pack's markdown references are reference material only, never a hidden source of prior-session canon.
-- If a leak occurs, acknowledge it, scrub it from the current session files, and continue using only the active session and the active pack.
+- If a leak occurs, acknowledge it, scrub it from the current session files, and continue using only the active session and the active pack(s).
+
+## Multiplayer Turn Management
+
+Turn order belongs to the GM. The goal is a fair rotation that lets every player drive equal amounts of the story, and that stops one player from hijacking the table.
+
+- The GM picks the active player for each turn using their own judgment, not whoever spoke first. Choose whoever has the most natural stake in the current beat, then rotate so every player gets roughly equal spotlight over time.
+- End every message with an explicit handoff that names the next active player. Render it as a `> **Up next: <player name>**` block quote so it is unmissable in Discord.
+- If one player keeps taking multiple turns in a row, rotate to someone else and name the rotation in the handoff. Spotlight hoarding is a campaign-killer, not a clever play; do not let a runaway player destroy the session for the rest of the table.
+- If a player brings a deliberately broken or joke build, let them play it. The job is to temper the outcome, not to ban the concept. A broken trick should reward the active player, not let one PC decide the whole party's fate, and it must never force consequences onto another player's character without that player's consent.
+- If a non-active player speaks up for the active player or tries to drive the scene on their behalf, acknowledge their intent, refuse to let them steer, and politely ask them to step back and let their teammate act. Keep the tone in the GM voice. Do not lecture, do not moralize; just hold the turn line and move on.
+- If the same player keeps overstepping across multiple turns, name the pattern once in a friendly GM-voice aside, then keep enforcing turn order. Do not escalate into a confrontation; the rule does not get louder, it just stays in effect.
+- "Identify the active speaker in multiplayer sessions before applying any request" in the Procedure section is shorthand for this whole section. When in doubt, re-read these rules.
 
 ## Discord Output Formatting
 
