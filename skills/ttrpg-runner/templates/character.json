@@ -1,0 +1,59 @@
+{
+  "name": "{{name}}",
+  "slug": "{{slug}}",
+  "kind": "character",
+  "role": "{{role}}",
+  "allegiance": "{{allegiance}}",
+  "status": "active",
+  "first_impression": "{{first_impression}}",
+  "signature_gear": "{{signature_gear}}",
+  "leverage": "{{leverage}}",
+  "threat_level": "{{threat_level}}",
+  "stats": {
+    "STAT_1": {{stat_1}},
+    "STAT_2": {{stat_2}},
+    "STAT_3": {{stat_3}},
+    "STAT_4": {{stat_4}},
+    "STAT_5": {{stat_5}},
+    "STAT_6": {{stat_6}}
+  },
+  "derived": {
+    "hp": {{hp}},
+    "defense": {{defense}},
+    "stress": {{stress}},
+    "reputation": 0
+  },
+  "skills": [
+    {"path": "STAT/Skill", "rank": 0}
+  ],
+  "inventory": [
+    "{{inventory_item}}"
+  ],
+  "special_features": [
+    "{{special_feature}}"
+  ],
+  "level": 1,
+  "xp": 0,
+  "xp_to_next_level": 10,
+  "xp_log": [
+    {"amount": 0, "reason": "{{reason}}", "at": "{{utc_now}}"}
+  ],
+  "skill_entries": [
+    {
+      "path": "STAT/Skill",
+      "rank": 0,
+      "description": "{{description}}",
+      "frequency": "{{frequency}}",
+      "effect": "{{effect}}",
+      "limitations": "{{limitations}}"
+    }
+  ],
+  "hooks": [
+    "{{hooks}}"
+  ],
+  "secrets": [
+    "{{secrets}}"
+  ],
+  "relationship_to_crew": "{{relationship}}",
+  "session_notes": "{{session_notes}}"
+}

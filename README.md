@@ -1,47 +1,56 @@
-# cyberpunk-runner
+# ttrpg-runner
 
-`cyberpunk-runner` is a Hermes skill tap for running session-isolated cyberpunk tabletop campaigns.
+`ttrpg-runner` is a Hermes skill tap for running session-isolated tabletop RPG campaigns across multiple native setting packs.
+
 It is packaged to work as either:
 
 - a GitHub tap (`hermes skills tap add <owner>/<repo>`)
-- a directly copied external skill directory (`skills/cyberpunk-runner`)
-- a local skill dropped into `~/.hermes/skills/<category>/cyberpunk-runner/`
+- a directly copied external skill directory (`skills/ttrpg-runner`)
+- a local skill dropped into `~/.hermes/skills/<category>/ttrpg-runner/`
 
-> **Model Recommendation:** We strongly recommend running this skill against an **uncensored model**. Cyberpunk is brutal — the fiction leans on graphic violence, hard drugs, sexual content, corpo cruelty, and moral rot, and a heavily filtered model will sand the edges off the genre until the campaign stops feeling like cyberpunk. The skill is designed to play that material straight; pairing it with a sanitized model will produce muted, repetitive, and frankly boring sessions.
+## Native Support
+
+`ttrpg-runner` natively supports five flavor packs:
+
+- `cyberpunk`
+- `dnd`
+- `mistborn`
+- `pokemon`
+- `expanse`
+
+The skill should tell players that any TTRPG is still possible even when it is not one of the five native packs, but those unsupported games run in a reduced-feature mode with no native pack references.
 
 ## What It Includes
 
-- A Hermes-native `SKILL.md` with progressive-disclosure references and configuration settings
-- Standard-library Python tools for setup, database search, scene oracles, dice rolls, and session management
-- A local searchable SQLite knowledge base built from bundled public/open cyberpunk data packs
-- An optional internet enrichment pass that pulls public genre summaries from Wikipedia
+- A shared `SKILL.md` that handles session lifecycle, isolation, dice usage, and flavor-pack loading rules
+- A Discord-native markdown reference so player-facing output reads cleanly in chat
+- Shared Python helpers for fair dice rolling and lightweight session utilities
+- Shared templates for dossiers and running session state
+- Five native flavor packs under `skills/ttrpg-runner/flavorpacks/`
+- A `mistborn` pack that requires an explicit `Era 1` or `Era 2` choice and imports the full upstream markdown reference tree with citations
+- No bundled seed libraries of reusable story ingredients; the system is designed to author fresh content instead
+- No database bootstrap or searchable pack index; references are markdown files in the repo
+- Any future externally curated reference material should be stored as markdown with source citations at the top
 - Persistent per-session story storage with JSON character dossiers plus markdown location, event, roll, and story logs
-- Bootstrap guidance for solo play or multi-player Discord sessions, including per-user character mapping and Discord troubleshooting notes
-- Session isolation rules so each invocation starts a fresh play archive unless the user explicitly resumes one
-
-## Hermes Features Used
-
-This repository is designed specifically around the Hermes skills system documented at:
-<https://hermes-agent.nousresearch.com/docs/user-guide/features/skills>
-
-It uses Hermes-specific features including:
-
-- `SKILL.md` frontmatter with `metadata.hermes.category`, tags, and config settings
-- Progressive disclosure via `references/`, `templates/`, `scripts/`, and `assets/`
-- Tap-compatible repository layout under `skills/`
-- Optional `skills.sh.json` groupings for better Skills Hub categorization
-- Slash-command-friendly instructions for `/cyberpunk-runner`
+- Strict instructions to load only the active pack for the chosen setting
 
 ## Repository Layout
 
 ```text
 skills/
-  cyberpunk-runner/
+  ttrpg-runner/
     SKILL.md
     references/
+      session-data-model.md
+      discord-formatting.md
     templates/
     scripts/
-    assets/
+    flavorpacks/
+      cyberpunk/
+      dnd/
+      mistborn/
+      pokemon/
+      expanse/
 skills.sh.json
 README.md
 ```
@@ -54,7 +63,7 @@ Publish this repository and then run:
 
 ```bash
 hermes skills tap add <owner>/<repo>
-hermes skills install <owner>/<repo>/cyberpunk-runner
+hermes skills install <owner>/<repo>/ttrpg-runner
 ```
 
 ### As an External Skill Directory
@@ -67,46 +76,32 @@ skills:
     - ~/.agents/skills
 ```
 
-Hermes will discover `cyberpunk-runner` automatically and expose it as `/cyberpunk-runner`.
+Hermes will discover `ttrpg-runner` automatically and expose it as `/ttrpg-runner`.
 
 ## Runtime Behavior
 
-The skill is intentionally session-centric:
+- A normal `/ttrpg-runner <prompt>` call creates a new play session folder unless the player explicitly resumes one
+- The session stores its own narrative state and dossiers under `~/.hermes/ttrpg-runner/sessions/<session-id>/`
+- Native-pack references live in pack-local markdown files, so `cyberpunk` guidance never mixes with `mistborn`, `pokemon`, `dnd`, or `expanse`
+- Unsupported games still work, but without native pack references
 
-- A normal `/cyberpunk-runner <prompt>` call creates a new play session folder
-- The session stores its own narrative state and dossiers under `~/.hermes/cyberpunk-runner/sessions/<session-id>/`
-- In Discord, the skill can map multiple human players to their own character files inside the same session
-- The agent is instructed to use only the active session's files unless the player explicitly asks to resume a prior session
+## Mistborn Support
 
-Hermes skills do not currently provide a documented way for third-party skills to open a brand new Hermes chat thread programmatically. To stay compliant with Hermes as documented, this skill implements a fresh isolated *play session* on invocation, with dedicated storage and strict context-scoping rules.
+- `mistborn` is a native pack and requires the player to choose `Era 1` or `Era 2` before chargen or worldbuilding
+- The chosen era should be stored in `session.json` as `mistborn_era` so the session stays era-locked
+- The pack imports the full markdown corpus from `UnauthorizedPrimerOfScadrianAdventureGameplay` and preserves the same source folder split
+- Imported files carry source citations at the top, and `references/era-rules.md` defines how Era 1 and Era 2 differ in play
 
 ## Core Scripts
 
-The skill exposes a small set of one-shot Python helpers. **There is no session controller script** — Hermes reads and writes the active session's files directly with its own file tools, treating the session folder as the API.
+- `dice.py` - rolls generic dice and fast `1d10 + stat + skill + modifier` checks using Python's uniform `randint`
+- `ttrpg_lib.py` - shared filesystem and session helpers used by the scripts above
 
-- `bootstrap_sources.py` — builds or refreshes the cyberpunk knowledge database
-- `db_search.py` — searches the knowledge database for tone, texture, and reference material
-- `dice.py` — rolls generic dice and cyberpunk-style action checks
-- `cyberpunk_lib.py` — shared utilities used by the scripts above
+## Discord Output
 
-The session files themselves (under `~/.hermes/cyberpunk-runner/sessions/<session-id>/`) are the interface, and the agent drives them with the Hermes file tools.
+- All player-facing output uses Discord-native markdown so messages render cleanly in chat
+- `references/discord-formatting.md` is the canonical formatting reference for the agent
+- Dice cards live in fenced code blocks, NPC speech in `>` block quotes, scene headers in `###` headings, ambient tags in `-#` subtext
+- Each flavor pack `PACK.md` has a "Discord Rendering" section with setting-specific guidance
 
-## Data Model
-
-Each play session contains:
-
-- `session.json`: metadata, clocks, open threads, Discord user registry, party ties, and current situation
-- `story.md`: running fiction log
-- `timeline.md`: concise event chronology
-- `gm-notes.md`: hidden planning notes and stakes
-- `characters/`: one JSON dossier per important character (players and NPCs); schema in `templates/character.json`
-- `locations/`: one markdown dossier per important location
-- `events/`: one markdown dossier per major event or mission beat
-- `rolls/`: optional dice result logs
-
-## Design Notes
-
-- The skill is system-agnostic and genre-first rather than a verbatim implementation of any proprietary tabletop rulebook
-- Seed data is original/openly shareable and intended for improvisational play
-- Optional public internet enrichment stays additive and never blocks play if the network is unavailable
-- All Python tooling uses the standard library only for easy Hermes-side execution
+The session files themselves (under `~/.hermes/ttrpg-runner/sessions/<session-id>/`) are the interface, and the agent drives them with Hermes file tools.
