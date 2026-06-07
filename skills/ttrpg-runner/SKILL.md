@@ -70,6 +70,8 @@ Use this skill when the player wants to:
 - Do not use a database, bootstrap pipeline, or online-downloaded search index for pack knowledge.
 - If curated external reference material is ever added to the repo, store it as markdown with source citations at the top of the file.
 - Support both solo play and multiplayer play. If multiple Discord users are in the session, track exactly which human maps to which character slug.
+- Wait for the player to explicitly authorize play before opening the first scene, narrating fiction, or rolling dice. Finishing setup, confirming the setting, or completing character creation is not a green light to begin.
+- During character creation, always offer one or more suggested initial loadouts (starting gear, resources, and any setting-specific kits) that the player can accept, modify, or reject. Do not finish a character without surfacing concrete starting options for the player to react to.
 
 ## Skill Layout
 
@@ -132,6 +134,8 @@ Configured `ttrpg_runner.base_dir` (default `~/.hermes/ttrpg-runner`) is the roo
 1. Establish the table and the game.
    Ask whether the player wants solo or multiplayer play, then identify the requested setting before you start creating content.
    If the setting is `mistborn`, ask for `Era 1` or `Era 2` before character creation or worldbuilding.
+   Do not open the first scene, narrate fiction, or roll dice until the player has explicitly said `start`, `begin`, `go`, or otherwise authorized play. Finishing setup, confirming the setting, building the character roster, or completing character creation is not a green light to begin the story. When in doubt, ask before you narrate.
+   When you walk the player through character creation, propose at least one suggested initial loadout (starting gear, resources, and any setting-specific kits such as Mistborn metals, Cyberpunk cyberware, or DND 5e starting equipment) and let the player accept, modify, or swap it. Surface this offer before the character sheet is locked so the player always has concrete starting options on the table.
 
 2. Resolve native support.
    If the setting is `cyberpunk`, `dnd`, `mistborn`, `pokemon`, or `expanse`, say it is natively supported and load only that pack's `PACK.md`.
