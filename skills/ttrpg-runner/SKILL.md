@@ -72,6 +72,7 @@ Use this skill when the player wants to:
 - Support both solo play and multiplayer play. If multiple Discord users are in the session, track exactly which human maps to which character slug.
 - Wait for the player to explicitly authorize play before opening the first scene, narrating fiction, or rolling dice. Finishing setup, confirming the setting, or completing character creation is not a green light to begin.
 - During character creation, always offer one or more suggested initial loadouts (starting gear, resources, and any setting-specific kits) that the player can accept, modify, or reject. Do not finish a character without surfacing concrete starting options for the player to react to.
+- Do not begin initializing other players' characters until the player has finished their character creation. If someone else, interjetcs, politely request that they wait their turn but acknowledge their character creation.
 
 ## Skill Layout
 
