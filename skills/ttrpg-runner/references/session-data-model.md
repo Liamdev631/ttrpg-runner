@@ -30,6 +30,7 @@ Each session lives under:
   "game": "cyberpunk",
   "flavor_pack": "cyberpunk",
   "support_level": "native",
+  "mistborn_era": null,
   "theme": "stolen biotech manifest",
   "tone": "tense and cinematic",
   "player_request": "Run a one-shot for two players.",
@@ -98,6 +99,7 @@ Each session lives under:
 - Character files are JSON and are the canonical sheets.
 - `session.json > player_characters` is a denormalized mirror for quick lookup during play.
 - The exact stat labels and genre details should match the active flavor pack or the unsupported game's agreed system.
+- Pack-specific fields such as `mistborn_era` are allowed when the active flavor pack needs them.
 - Shared fields such as `skills`, `derived`, `xp_log`, `skill_entries`, and status tracking should stay consistent across packs.
 - `inventory` and `special_features` are intentionally generic so each pack can interpret them in setting-appropriate ways.
 

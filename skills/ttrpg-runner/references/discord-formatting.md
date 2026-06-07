@@ -107,7 +107,7 @@ Single-line inline code is for short tokens, expressions, or commands:
 Roll `1d20 + REF + 3` to see if the door holds.
 ```
 
-Multi-line fenced code blocks are for the roll cards, the character sheets, and any tabular data. Discord treats ``` ```text ``` and ``` ``` ``` identically for prose; the language tag is just a hint to the renderer.
+Multi-line fenced code blocks are for roll cards, character sheets, and any tabular data. Discord renders fenced blocks the same either way; the language tag is only a renderer hint.
 
 ```text
 ```
@@ -208,8 +208,7 @@ See "Block Quotes vs Code Blocks for Dice" above.
 - You owe **Yuki** a follow-up call.
 - The south gate job opens at 04:00.
 - `HP 12/12`, `Stress 2/6`, `¥4,200` in the account.
-
-> -# Session file: `~/.hermes/ttrpg-runner/sessions/<id>/`
+-# Session file: `~/.hermes/ttrpg-runner/sessions/<id>/`
 ```
 
 ## Style Rules for This Skill

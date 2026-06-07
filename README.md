@@ -10,14 +10,15 @@ It is packaged to work as either:
 
 ## Native Support
 
-`ttrpg-runner` natively supports four flavor packs:
+`ttrpg-runner` natively supports five flavor packs:
 
 - `cyberpunk`
 - `dnd`
+- `mistborn`
 - `pokemon`
 - `expanse`
 
-The skill should tell players that any TTRPG is still possible even when it is not one of the four native packs, but those unsupported games run in a reduced-feature mode with no native pack references.
+The skill should tell players that any TTRPG is still possible even when it is not one of the five native packs, but those unsupported games run in a reduced-feature mode with no native pack references.
 
 ## What It Includes
 
@@ -25,7 +26,8 @@ The skill should tell players that any TTRPG is still possible even when it is n
 - A Discord-native markdown reference so player-facing output reads cleanly in chat
 - Shared Python helpers for fair dice rolling and lightweight session utilities
 - Shared templates for dossiers and running session state
-- Four native flavor packs under `skills/ttrpg-runner/flavorpacks/`
+- Five native flavor packs under `skills/ttrpg-runner/flavorpacks/`
+- A `mistborn` pack that requires an explicit `Era 1` or `Era 2` choice and imports the full upstream markdown reference tree with citations
 - No bundled seed libraries of reusable story ingredients; the system is designed to author fresh content instead
 - No database bootstrap or searchable pack index; references are markdown files in the repo
 - Any future externally curated reference material should be stored as markdown with source citations at the top
@@ -46,6 +48,7 @@ skills/
     flavorpacks/
       cyberpunk/
       dnd/
+      mistborn/
       pokemon/
       expanse/
 skills.sh.json
@@ -79,8 +82,15 @@ Hermes will discover `ttrpg-runner` automatically and expose it as `/ttrpg-runne
 
 - A normal `/ttrpg-runner <prompt>` call creates a new play session folder unless the player explicitly resumes one
 - The session stores its own narrative state and dossiers under `~/.hermes/ttrpg-runner/sessions/<session-id>/`
-- Native-pack references live in pack-local markdown files, so `cyberpunk` guidance never mixes with `pokemon`, `dnd`, or `expanse`
+- Native-pack references live in pack-local markdown files, so `cyberpunk` guidance never mixes with `mistborn`, `pokemon`, `dnd`, or `expanse`
 - Unsupported games still work, but without native pack references
+
+## Mistborn Support
+
+- `mistborn` is a native pack and requires the player to choose `Era 1` or `Era 2` before chargen or worldbuilding
+- The chosen era should be stored in `session.json` as `mistborn_era` so the session stays era-locked
+- The pack imports the full markdown corpus from `UnauthorizedPrimerOfScadrianAdventureGameplay` and preserves the same source folder split
+- Imported files carry source citations at the top, and `references/era-rules.md` defines how Era 1 and Era 2 differ in play
 
 ## Core Scripts
 

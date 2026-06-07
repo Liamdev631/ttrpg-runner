@@ -44,7 +44,7 @@ Suggested derived trackers:
 - crew loyalty, trauma, and hidden cargo
 
 ## Discord Rendering
-- Lead every beat with a `-#` line carrying the **station/ship name**, the **time**, and the **system or jurisdiction**. The setting is the story.
+- Open scenes with a `###` heading that names the **station**, **ship**, or **operation**, then follow with `-#` subtext carrying the **time** and **system or jurisdiction**. The setting is the story.
 - Use `> ` block quotes for ship-net chatter, union broadcasts, and any dialogue routed through comms.
 - Italicize ship and station names with `*...*` so the proper nouns read as proper nouns.
 - Use `__...__` underline for **system-critical** readings: reactor status, air reserves, fuel, hull integrity, comms latency.

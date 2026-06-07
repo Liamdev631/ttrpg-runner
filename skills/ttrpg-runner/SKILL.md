@@ -29,6 +29,7 @@ Run a fresh tabletop RPG session with strict per-session memory isolation and ex
 
 - `cyberpunk`
 - `dnd`
+- `mistborn`
 - `pokemon`
 - `expanse`
 
@@ -45,6 +46,7 @@ These rules are mandatory and exist to stop cross-setting contamination.
 - If the player says `cyberpunk`, do not load `pokemon`. If they say `pokemon`, do not load `dnd`. One pack only.
 - If the player changes settings mid-conversation, stop and confirm whether they want to abandon the current session and start a new one.
 - Unsupported settings run in generic mode. Do not load native-pack reference docs in generic mode.
+- If the player wishes to merge two settings, explain that this leaves native-pack mode. Stay in generic unsupported mode unless the user explicitly wants a custom crossover session.
 
 ## When to Use
 
@@ -91,6 +93,7 @@ skills/ttrpg-runner/
       PACK.md
       references/
     dnd/...
+    mistborn/...
     pokemon/...
     expanse/...
 ```
@@ -128,9 +131,10 @@ Configured `ttrpg_runner.base_dir` (default `~/.hermes/ttrpg-runner`) is the roo
 
 1. Establish the table and the game.
    Ask whether the player wants solo or multiplayer play, then identify the requested setting before you start creating content.
+   If the setting is `mistborn`, ask for `Era 1` or `Era 2` before character creation or worldbuilding.
 
 2. Resolve native support.
-   If the setting is `cyberpunk`, `dnd`, `pokemon`, or `expanse`, say it is natively supported and load only that pack's `PACK.md`.
+   If the setting is `cyberpunk`, `dnd`, `mistborn`, `pokemon`, or `expanse`, say it is natively supported and load only that pack's `PACK.md`.
    If it is anything else, say the game is still possible with reduced features and stay in generic mode.
 
 3. Resolve the base directory.
@@ -139,6 +143,7 @@ Configured `ttrpg_runner.base_dir` (default `~/.hermes/ttrpg-runner`) is the roo
 4. Load native-pack references only when needed.
    For native packs, read only the active pack's docs.
    Start with `flavorpacks/<pack>/PACK.md`, then open deeper markdown files from the same pack only when the current turn actually needs them.
+   If the active pack is `mistborn`, read `flavorpacks/mistborn/references/era-rules.md` immediately after `PACK.md` and before opening imported source files.
    Also load `references/discord-formatting.md` once per session so player-facing messages render with Discord-native markdown.
 
 5. Create or resume a session by hand.
@@ -153,6 +158,7 @@ Configured `ttrpg_runner.base_dir` (default `~/.hermes/ttrpg-runner`) is the roo
    - `game`: the human-facing name the player asked for
    - `flavor_pack`: the active native pack name, or `null` for unsupported games
    - `support_level`: `native` or `reduced`
+   - `mistborn_era`: `era1` or `era2` when the active pack is `mistborn`; otherwise `null`
 
 7. Run the game by editing the active session's files.
    On every turn:
@@ -307,12 +313,13 @@ For low-stakes or off-screen rolls, the code block alone is fine.
 
 The skill is working correctly when all of the following are true:
 
-- The agent tells the player that `cyberpunk`, `dnd`, `pokemon`, and `expanse` are natively supported.
+- The agent tells the player that `cyberpunk`, `dnd`, `mistborn`, `pokemon`, and `expanse` are natively supported.
 - The agent also says unsupported TTRPGs are possible with reduced features.
 - Only the chosen native pack is loaded for a native game.
 - No database bootstrap or search step is required for play.
 - The active session folder contains `session.json`, `story.md`, `timeline.md`, `gm-notes.md`, and the `characters/`, `locations/`, `events/`, and `rolls/` directories.
 - `session.json` records the selected game and whether support is `native` or `reduced`.
+- `session.json` records `mistborn_era` when the active pack is `mistborn`.
 - The current scene's new facts are written back into the active session's files using Hermes file tools.
 - No scene content was produced by mixing another flavor pack or another saved session into the current one.
 - Player-facing output uses Discord-native markdown: `###` scene headers, `**bold**` anchors, `>` block quotes for NPC speech, fenced code blocks for dice cards, and `-#` for ambient tags.
