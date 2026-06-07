@@ -3,7 +3,9 @@
   "groupings": [
     {
       "title": "Games and Simulation",
-      "skills": ["cyberpunk-runner"]
+      "skills": [
+        "ttrpg-runner"
+      ]
     }
   ]
 }
