@@ -12,6 +12,7 @@ Each session lives under:
 - `story.md`
 - `timeline.md`
 - `gm-notes.md`
+- `secrets.md`
 
 ## Required Directories
 
@@ -43,38 +44,13 @@ Each session lives under:
       "character_slug": "rook-vale"
     }
   ],
-  "player_characters": [
+  "player_character_refs": [
     {
       "user_id": "112233445566778899",
       "username": "liamb",
       "slug": "rook-vale",
       "name": "Rook Vale",
-      "concept": "ex-clinic courier",
-      "stats": {
-        "REF": 4,
-        "TEK": 3,
-        "COO": 3,
-        "BOD": 2,
-        "INT": 2,
-        "CHA": 2
-      },
-      "skills": [
-        {"path": "REF/Firearms", "rank": 2}
-      ],
-      "derived": {
-        "hp": 6,
-        "defense": 4,
-        "stress": 3,
-        "reputation": 0
-      },
-      "inventory": ["heavy pistol", "medkit"],
-      "special_features": ["targeting optics"],
-      "level": 1,
-      "xp": 0,
-      "xp_to_next_level": 10,
-      "xp_log": [],
-      "skill_entries": [],
-      "status": "active"
+      "concept": "ex-clinic courier"
     }
   ],
   "party": {
@@ -96,24 +72,35 @@ Each session lives under:
 
 ## Dossier Conventions
 
-- Character files are JSON and are the canonical sheets.
-- `session.json > player_characters` is a denormalized mirror for quick lookup during play.
+- Character files are **markdown** (`characters/<slug>.md`) and are the canonical sheets. Plain text, no JSON parsing on the hot path.
+- The markdown template lives at `templates/character.md`. Pack-specific stat labels replace the `STAT_*` placeholders; everything else stays the same shape across packs.
+- `session.json > player_character_refs` is a routing table only: it carries `user_id`, `username`, `slug`, `name`, and a one-line `concept` so the GM can identify whose turn it is. It does **not** mirror the full sheet.
 - The exact stat labels and genre details should match the active flavor pack or the unsupported game's agreed system.
 - Pack-specific fields such as `mistborn_era` are allowed when the active flavor pack needs them.
-- Shared fields such as `skills`, `derived`, `xp_log`, `skill_entries`, and status tracking should stay consistent across packs.
-- `inventory` and `special_features` are intentionally generic so each pack can interpret them in setting-appropriate ways.
+- Shared sections such as `Stats`, `Derived`, `Skills`, `Progression`, `Inventory`, `Special Features`, and status tracking should stay consistent across packs, even though they live in markdown.
+- `Inventory` and `Special Features` are intentionally generic so each pack can interpret them in setting-appropriate ways.
 
-## Mirroring Rule
+## Source Of Truth
 
-When a player-character sheet changes, update both:
+Character data has one and only one storage location: the markdown file at `characters/<slug>.md`.
 
-- `characters/<player-slug>.json`
-- the matching object in `session.json > player_characters`
+- Read the markdown file when the GM needs the full sheet.
+- The `player_character_refs` array in `session.json` is the lightweight routing table for "who is playing which character". It is not a copy of the sheet and is allowed to drift from it; if it does, fix the markdown and rewrite only the ref.
+- Never store stats, skills, derived values, inventory, or XP in `session.json`. Those belong in the markdown file and only the markdown file.
+- Companion pokemon and recurring NPCs also live as `characters/<slug>.md` files, using the same template with the `Kind` field set to `companion` or `npc`. No separate NPC schema.
 
-If they drift, prefer the player JSON as the source of truth and rewrite the session mirror from it.
+## Secrets File
+
+`secrets.md` is the GM-only ledger for facts that must never reach player-facing chat: hidden NPC agendas, true identities, secret faction goals, planted evidence, ticking bombs the GM is holding, and the real reason a scene is the way it is. It is seeded from `templates/secrets.md`, lives next to `gm-notes.md`, and is read by the GM, not the table.
+
+- One entry per secret, with a stable title the GM can reference in private planning.
+- Each entry carries a status (`dormant`, `active`, `about_to_fire`, `resolved`), the surface cover the players currently believe, the reveal trigger, and the consequences if the secret is exposed.
+- Burned or fired secrets get archived in the `Burned Secrets` section of the same file so the GM can audit the twist budget without re-using the same beat.
+- Treat `secrets.md` as out-of-band GM memory. It is allowed to be read and written by the GM during a turn, but its contents must never be echoed, paraphrased, or spoiler-tagged into a player-visible message.
 
 ## Isolation Boundary
 
 The session directory is the authoritative context boundary for play.
 If the user wants a fresh game, create a fresh session directory.
 If the user wants to resume, load exactly one saved session directory unless they explicitly request a crossover.
+A `secrets.md` from a prior session never carries over into a new session. Every new session gets its own blank secrets file.

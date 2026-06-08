@@ -85,9 +85,10 @@ skills/ttrpg-runner/
     discord-formatting.md
   templates/
     ad-crawl.md
-    character.json
+    character.md
     event.md
     location.md
+    secrets.md
     session-summary.md
   scripts/
     dice.py
@@ -114,6 +115,7 @@ Configured `ttrpg_runner.base_dir` (default `~/.hermes/ttrpg-runner`) is the roo
       story.md
       timeline.md
       gm-notes.md
+      secrets.md
       characters/
       locations/
       events/
@@ -126,7 +128,8 @@ Configured `ttrpg_runner.base_dir` (default `~/.hermes/ttrpg-runner`) is the roo
 - `story.md`: running fiction and scene recap.
 - `timeline.md`: concise beat-by-beat chronology.
 - `gm-notes.md`: hidden planning notes, stakes, and hooks.
-- `characters/<slug>.json`: canonical sheets for PCs and important NPCs.
+- `secrets.md`: GM-only truths that must never be printed in player chat (hidden agendas, true identities, ticking bombs, GM-triggered twists).
+- `characters/<slug>.md`: canonical markdown sheets for PCs, companions, and important NPCs. Plain text, no JSON parsing.
 - `locations/<slug>.md`: named places with sensory details and hidden layers.
 - `events/<slug>.md`: missions, incidents, betrayals, and turning points.
 - `rolls/<stamp>-<label>.json`: optional audit trail for important dice calls.
@@ -156,7 +159,7 @@ Configured `ttrpg_runner.base_dir` (default `~/.hermes/ttrpg-runner`) is the roo
 5. Create or resume a session by hand.
    Hermes manages the session directory directly with its file tools.
 
-   - New session: create a fresh `<session-id>` folder and seed `session.json`, `story.md`, `timeline.md`, `gm-notes.md`, and the `characters/`, `locations/`, `events/`, and `rolls/` directories.
+   - New session: create a fresh `<session-id>` folder and seed `session.json`, `story.md`, `timeline.md`, `gm-notes.md`, `secrets.md`, and the `characters/`, `locations/`, `events/`, and `rolls/` directories. Use `templates/secrets.md` as the starting shape for `secrets.md` so the GM-only banner and the "do not print" rules are present from the first turn.
    - Resume flow: list the saved sessions, let the player choose one, then read only that session's files.
 
 6. Record the chosen game in `session.json`.
@@ -192,6 +195,24 @@ These rules are non-negotiable.
 - The active session directory is the only authoritative memory for the current run.
 - A native pack's markdown references are reference material only, never a hidden source of prior-session canon.
 - If a leak occurs, acknowledge it, scrub it from the current session files, and continue using only the active session and the active pack(s).
+
+## GM Secrets Handling
+
+Some facts in a session belong to the GM and the GM alone. The moment one of those facts lands in player-visible chat, in-character dialogue, a recap, a shared handout, an ambient insert, or a "soft hint" message, it stops being a secret and starts being table canon. Treat that line as load-bearing.
+
+Every active session ships with a `secrets.md` file seeded from `templates/secrets.md`. The template's banner is not decoration; it is the operational rule.
+
+- **Storage.** Put every GM-only truth in `secrets.md`. The file lives next to `gm-notes.md` and is read by the GM, not the table.
+- **Never print.** Do not paste `secrets.md` contents, summaries, paraphrases, hints, or confirmations into any player-facing Discord message. Spoiler tags do not count; anything the player can click to reveal has already been exposed.
+- **No soft reveals.** Do not let an NPC, ambient insert, or "as you recall" passage leak a secret by accident. If a secret is in `secrets.md`, it does not appear in the fiction until the GM deliberately opens the door.
+- **Refuse close guesses politely.** If a player gets hot and names a secret out loud, the GM does not confirm, deny, or echo it. Answer in the GM voice, redirect the spotlight, and let the table earn the reveal through play.
+- **Track lifecycle.** Every entry in `secrets.md` has a status: `dormant`, `active`, `about_to_fire`, or `resolved`. Move statuses as the scene evolves. Burned or fired secrets get archived in the `Burned Secrets` section so the GM does not re-use the same twist.
+- **Surface cover is mandatory.** Each secret records what the players currently believe. The GM uses that cover to keep the fiction coherent without leaking the truth.
+- **Reveal triggers are GM-only.** The "Reveal Trigger" and "If Exposed" fields tell the GM when and how the secret is allowed to surface. The table does not see them. Do not describe trigger conditions in chat.
+- **Cross-session hygiene.** Secrets are session-scoped. Never carry a `secrets.md` from a prior session into a new one. A fresh session gets a fresh `secrets.md`.
+- **Leak protocol.** If a secret accidentally reaches the player, acknowledge it in the GM voice, move the entry to `Burned Secrets` in the same `secrets.md`, and continue play without relying on it. Do not pretend the leak did not happen and do not retcon player knowledge.
+
+What belongs in `secrets.md` includes: hidden NPC agendas, true identities, secret faction goals, planted evidence, ticking bombs the players cannot see, GM-triggered twists, the real reason a scene is the way it is, and any fact that would change player behavior the moment it surfaced.
 
 ## Multiplayer Turn Management
 
@@ -314,6 +335,8 @@ For low-stakes or off-screen rolls, the code block alone is fine.
 - `scripts/ttrpg_lib.py` - shared helpers for filesystem layout, pack resolution, and session utilities.
 - `references/session-data-model.md` - canonical session and dossier shape.
 - `references/discord-formatting.md` - Discord-native markdown reference for player-facing output.
+- `templates/character.md` - canonical markdown sheet for PCs, companions, and NPCs. Use this instead of any JSON shape.
+- `templates/secrets.md` - GM-only secrets ledger; never printed in chat.
 
 ## Pitfalls
 
@@ -327,6 +350,8 @@ For low-stakes or off-screen rolls, the code block alone is fine.
 - Do not let pack references override player-authored facts from the active session.
 - Do not narrate past the dice.
 - Do not let one player's request, inventory, XP, or consequence land on another player's character in multiplayer play.
+- Do not print the contents of `secrets.md` (or any paraphrase, hint, or spoiler-tagged copy of it) into player-facing chat. The instant a secret is rendered to a player it stops being a secret.
+- Do not store character stats, skills, derived values, inventory, or XP in JSON. Character sheets are markdown; `session.json` only carries lightweight character refs for routing.
 
 ## Verification
 
@@ -336,7 +361,7 @@ The skill is working correctly when all of the following are true:
 - The agent also says unsupported TTRPGs are possible with reduced features.
 - Only the chosen native pack is loaded for a native game.
 - No database bootstrap or search step is required for play.
-- The active session folder contains `session.json`, `story.md`, `timeline.md`, `gm-notes.md`, and the `characters/`, `locations/`, `events/`, and `rolls/` directories.
+- The active session folder contains `session.json`, `story.md`, `timeline.md`, `gm-notes.md`, `secrets.md`, and the `characters/`, `locations/`, `events/`, and `rolls/` directories.
 - `session.json` records the selected game and whether support is `native` or `reduced`.
 - `session.json` records `mistborn_era` when the active pack is `mistborn`.
 - The current scene's new facts are written back into the active session's files using Hermes file tools.
