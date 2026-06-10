@@ -2,13 +2,6 @@
 
 ## Citations
 
-Adapted mechanics and tone notes drawn from:
-
-- *Neon Sunset* by Craig Chouraki-Lewin — [github.com/CSLewin/NeonSunset](https://github.com/CSLewin/NeonSunset)
-- *Neon Sunset — HEAT notes* — [github.com/CSLewin/NeonSunset/blob/master/notes%20-%20HEAT.md](https://github.com/CSLewin/NeonSunset/blob/master/notes%20-%20HEAT.md)
-
-Nothing is copied verbatim; all notes are paraphrased for this pack.
-
 Load this pack only when the player explicitly wants a cyberpunk game.
 
 ## Tone Targets
@@ -123,6 +116,4 @@ This pack does not ship reusable story seed data.
 
 That is intentional: the agent should author fresh jobs, rumors, districts, factions, names, and twists every session instead of drawing from a bundled library that can repeat.
 
-This pack also does not ship any downloaded source dump.
-
-If curated external references are ever added here, convert them into markdown files and place a citations block at the top that names each source URL before any adapted notes.
+This pack also does not ship any downloaded source dump. Adapted material from external references lives inline in this file and is paraphrased — see the `Citations` block at the top for source URLs and titles.
