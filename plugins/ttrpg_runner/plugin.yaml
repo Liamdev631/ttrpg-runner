@@ -1,0 +1,32 @@
+name: ttrpg-runner
+version: 3.1.0
+description: >-
+  Run isolated tabletop RPG sessions with persistent dossiers,
+  setting-specific flavor packs, and a story-aware context engine
+  that re-pastes the active session's data files after compression
+  and uses the bundled /ttrpg-recover skill to ask the LLM to
+  keep the data files in sync with the recent transcript.
+author: OpenAI
+provides_tools:
+  - ttrpg_roll
+provides_skills:
+  - ttrpg-bootstrap
+  - ttrpg-recover
+provides_hooks:
+  - pre_tool_call
+  - post_tool_call
+provides_context_engine: true
+requires_env: []
+metadata:
+  hermes:
+    tags: [games, tabletop, storytelling, simulation, python, ttrpg]
+    category: games
+    config:
+      - key: ttrpg_runner.base_dir
+        description: Root directory for ttrpg-runner saved sessions.
+        default: "~/.hermes/ttrpg-runner"
+        prompt: Directory for ttrpg-runner data
+      - key: ttrpg_runner.default_tone
+        description: Default session tone when the player does not specify one.
+        default: "adventurous"
+        prompt: Default campaign tone
