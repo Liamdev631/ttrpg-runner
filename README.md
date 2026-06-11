@@ -161,6 +161,13 @@ Plugins are opt-in. After cloning this repo:
 ```bash
 # Symlink or copy the plugin into your personal plugins dir
 ln -s "$(pwd)/plugins/ttrpg_runner" ~/.hermes/plugins/ttrpg-runner
+
+# Also link the bundled skills into the user's skills dir so they
+# show up as slash commands. `ctx.register_skill` makes them opt-in
+# for `skill_view(...)`, but the slash-command index only reads
+# from `~/.hermes/skills/`.
+ln -s "$(pwd)/plugins/ttrpg_runner/skill/ttrpg-bootstrap" ~/.hermes/skills/ttrpg-bootstrap
+ln -s "$(pwd)/plugins/ttrpg_runner/skill/ttrpg-recover"   ~/.hermes/skills/ttrpg-recover
 ```
 
 Then enable it in `~/.hermes/config.yaml`:
@@ -184,6 +191,8 @@ hermes plugins enable ttrpg-runner
 
 ```bash
 ln -s "$(pwd)/plugins/ttrpg_runner" .hermes/plugins/ttrpg-runner
+ln -s "$(pwd)/plugins/ttrpg_runner/skill/ttrpg-bootstrap" .hermes/skills/ttrpg-bootstrap
+ln -s "$(pwd)/plugins/ttrpg_runner/skill/ttrpg-recover"   .hermes/skills/ttrpg-recover
 export HERMES_ENABLE_PROJECT_PLUGINS=true
 hermes
 ```
