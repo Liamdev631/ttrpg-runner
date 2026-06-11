@@ -24,7 +24,6 @@ RECOVER_SKILL_FILE = RECOVER_SKILL_DIR / "SKILL.md"
 
 FLAVORPACKS_DIR = BOOTSTRAP_SKILL_DIR / "flavorpacks"
 TEMPLATES_DIR = BOOTSTRAP_SKILL_DIR / "templates"
-REFERENCES_DIR = BOOTSTRAP_SKILL_DIR / "references"
 
 # Convenience map: ``BUNDLED_SKILLS[name] -> Path`` for the skill files
 # the plugin entry point registers. The names are the slash-prefixed

@@ -178,14 +178,7 @@ def _register_skill(ctx: Any) -> None:
                 path,
             )
             continue
-        try:
-            ctx.register_skill(name, path)
-        except Exception as exc:  # pragma: no cover - defensive
-            logger.warning(
-                "ttrpg-runner: failed to register skill %s: %s",
-                name,
-                exc,
-            )
+        ctx.register_skill(name, path)
 
 
 def _register_context_engine(ctx: Any) -> None:

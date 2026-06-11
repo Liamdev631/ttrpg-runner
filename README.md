@@ -86,9 +86,9 @@ run in a reduced-feature mode with no native pack references.
 - Markdown templates for dossiers, secrets, and running session state
 - Five native flavor packs under
   `plugins/ttrpg_runner/skill/ttrpg-bootstrap/flavorpacks/`
-- A `mistborn` pack consolidated into one canonical `PACK.md`; the
-  imported upstream source tree stays in
-  `mistborn/references/` for when the GM needs the rules text
+- A `mistborn` pack consolidated into one canonical `PACK.md`, with
+  era-specific material in `mistborn/resources/` (`mistborn_era_1.md`,
+  `mistborn_era_2.md`)
 - No bundled seed libraries of reusable story ingredients; the system is
   designed to author fresh content instead
 - No database bootstrap or searchable pack index; references are markdown
@@ -127,12 +127,9 @@ plugins/
           expanse/PACK.md
           mistborn/
             PACK.md # canonical Mistborn pack with Era 1 / Era 2 sections
-            references/ # imported upstream source tree
-              source-manifest.md
-              Base Game/...
-              Nobles - The Golden Mandate/...
-              Skaa - Tin & Ash/...
-              Terris - Wrought of Copper/...
+            resources/
+              mistborn_era_1.md
+              mistborn_era_2.md
       ttrpg-recover/
         SKILL.md # /ttrpg-recover - post-compaction recovery
 README.md

@@ -4,19 +4,6 @@ description: Bootstrap a new isolated tabletop RPG session. Loads the right flav
 version: 3.0.0
 author: OpenAI
 platforms: [linux, macos, windows]
-metadata:
-  hermes:
-    tags: [games, tabletop, storytelling, simulation, python, ttrpg]
-    category: games
-    config:
-      - key: ttrpg_runner.base_dir
-        description: Root directory for ttrpg-runner saved sessions.
-        default: "~/.hermes/ttrpg-runner"
-        prompt: Directory for ttrpg-runner data
-      - key: ttrpg_runner.default_tone
-        description: Default session tone when the player does not specify one.
-        default: "adventurous"
-        prompt: Default campaign tone
 ---
 
 # TTRPG Bootstrap
