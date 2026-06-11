@@ -20,15 +20,29 @@ def _payload(data: Any) -> str:
 
 
 def roll(args: dict[str, Any], **kwargs) -> str:
-    """Roll a generic dice expression. Optional seed for reproducibility."""
-    expression = (args.get("expression") or "").strip()
-    if not expression:
-        return _payload({"error": "expression is required"})
-    try:
-        rng = lib.rng(args.get("seed"))
-        return _payload(lib.roll_expression(expression, rng))
-    except ValueError as exc:
-        return _payload({"error": str(exc)})
+    """Roll one or more dice expressions in a single batched call."""
+    requests = args.get("rolls")
+    if not isinstance(requests, list) or not requests:
+        return _payload(
+            {"error": "rolls must be a non-empty list of {expression, seed?} objects"}
+        )
+    results: list[dict[str, Any]] = []
+    for index, request in enumerate(requests):
+        if not isinstance(request, dict):
+            return _payload(
+                {"error": f"rolls[{index}] must be an object with an 'expression' field"}
+            )
+        expression = (request.get("expression") or "").strip()
+        if not expression:
+            return _payload({"error": f"rolls[{index}].expression is required"})
+        try:
+            rng = lib.rng(request.get("seed"))
+            results.append(lib.roll_expression(expression, rng))
+        except ValueError as exc:
+            return _payload(
+                {"error": str(exc), "index": index, "expression": expression}
+            )
+    return _payload({"mode": "batch", "count": len(results), "results": results})
 
 
 HANDLERS = {
