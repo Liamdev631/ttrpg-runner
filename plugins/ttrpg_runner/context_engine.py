@@ -8,8 +8,8 @@ Replaces Hermes' built-in ``ContextCompressor`` with one that:
   folder and re-pastes them as system messages inside the compressed
   context, so the GM has the full campaign state to work with after
   compression.
-* Repastes the active flavor pack's ``PACK.md`` (and active subpack's
-  ``PACK.md`` for packs that have them) into the compressed context
+* Repastes the active flavor pack's ``SKILL.md`` (and active subpack's
+  ``SKILL.md`` for packs that have them) into the compressed context
   so the GM never loses the operating rules of the current setting.
 * Appends a "recent transcript" tail of the last N messages verbatim
   so the model never loses the immediate scene.
@@ -31,8 +31,9 @@ in ``config.yaml`` to activate it (or pick it in
 
 The engine does not pattern-match characters or locations out of the
 transcript. Instead, the plugin's ``post_tool_call`` hook watches the
-GM's normal file reads and writes, registers any ``PACK.md`` under
-``skill/ttrpg-bootstrap/flavorpacks/`` as an active pack, and tracks
+GM's normal file reads and writes, registers any active pack
+(``SKILL.md`` under one of the plugin's ``ttrpg-<pack>/`` skill
+directories) and tracks
 the current ``sessions/<session-id>/`` directory. When the engine
 compresses, it reads every data file from that directory and emits
 them as system messages. The data files are the canonical state; the
@@ -41,7 +42,7 @@ LLM is asked to keep them in sync with the recent transcript.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 from agent.context_engine import ContextEngine  # type: ignore
 
@@ -102,8 +103,8 @@ class TTRPGContextEngine(ContextEngine):
       ``secrets.md``, plus everything under ``characters/``,
       ``locations/``, ``events/``, and ``rolls/``) as system messages
       so the GM still has the full campaign state after compression.
-    * The active flavor pack's ``PACK.md`` (plus any active subpack's
-      ``PACK.md``) is read from disk and repasted in full into the
+    * The active flavor pack's ``SKILL.md`` (plus any active subpack's
+      ``SKILL.md``) is read from disk and repasted in full into the
       compressed context, so the GM never loses the operating rules
       of the current setting across a compression boundary.
     * The last ``protect_last_n`` user/assistant/tool turns are kept
@@ -139,7 +140,7 @@ class TTRPGContextEngine(ContextEngine):
         context_length: int = 200_000,
         threshold_ratio: float = 0.5,
         protect_last_n: int = DEFAULT_PROTECT_LAST_N,
-        packs_dir: str | Path | None = None,
+        pack_skill_roots: Sequence[str | Path] | None = None,
     ) -> None:
         self.context_length = int(context_length)
         self.threshold_ratio = float(threshold_ratio)
@@ -150,11 +151,15 @@ class TTRPGContextEngine(ContextEngine):
         self.last_total_tokens = 0
         self.compression_count = 0
         self._focus_topic: str | None = None
-        self._packs_dir: Path | None = (
-            Path(packs_dir).resolve() if packs_dir else None
+        # Resolved roots of every bundled pack-skill directory. A
+        # tracked active pack's path lives under one of these roots
+        # and the matching root is what we use to compute the
+        # human-readable label for the repasted block.
+        self._pack_skill_roots: tuple[Path, ...] = tuple(
+            Path(root).resolve() for root in (pack_skill_roots or ())
         )
-        # Ordered list of PACK.md paths. Order is preserved so a base
-        # pack's content comes before its subpack's content.
+        # Ordered list of pack-skill SKILL.md paths. Order is preserved
+        # so a base pack's content comes before its subpack's content.
         self._active_pack_files: list[Path] = []
         self._active_session_dir: Path | None = None
 
@@ -168,7 +173,7 @@ class TTRPGContextEngine(ContextEngine):
 
     @property
     def active_pack_files(self) -> list[Path]:
-        """Read-only view of the active PACK.md paths, in load order."""
+        """Read-only view of the active SKILL.md paths, in load order."""
         return list(self._active_pack_files)
 
     @property
@@ -179,16 +184,25 @@ class TTRPGContextEngine(ContextEngine):
         return self._active_session_dir
 
     def register_active_pack(self, pack_path: str | Path) -> None:
-        """Mark a ``PACK.md`` as active for the current session.
+        """Mark a pack-skill ``SKILL.md`` as active for the current
+        session.
 
         Order is preserved so a base pack loads before its subpack.
-        The path is resolved against the engine's ``packs_dir`` when
-        it is relative.
+        A relative path is resolved against the first pack-skill root
+        that contains it.
         """
         path = Path(pack_path)
-        if not path.is_absolute() and self._packs_dir is not None:
-            path = self._packs_dir / path
-        path = path.resolve()
+        if not path.is_absolute():
+            for root in self._pack_skill_roots:
+                candidate = (root / path).resolve()
+                if root in candidate.parents or candidate.parent == root:
+                    path = candidate
+                    break
+            else:
+                if self._pack_skill_roots:
+                    path = (self._pack_skill_roots[0] / path).resolve()
+        else:
+            path = path.resolve()
         if path in self._active_pack_files:
             return
         self._active_pack_files.append(path)
@@ -266,7 +280,7 @@ class TTRPGContextEngine(ContextEngine):
                     break
         tail.reverse()
 
-        # Read the active pack PACK.md files from disk and repaste them
+        # Read the active pack SKILL.md files from disk and repaste them
         # as system messages, in load order, just before the session
         # data files.
         pack_messages = self._build_active_pack_messages()
@@ -296,9 +310,9 @@ class TTRPGContextEngine(ContextEngine):
     # ---- helpers --------------------------------------------------------
 
     def _build_active_pack_messages(self) -> list[dict[str, Any]]:
-        """Read every tracked active PACK.md and wrap it as a system
-        message. Missing files are skipped silently so a stale tracker
-        does not crash compression.
+        """Read every tracked active pack-skill ``SKILL.md`` and wrap
+        it as a system message. Missing files are skipped silently so
+        a stale tracker does not crash compression.
         """
         messages: list[dict[str, Any]] = []
         for pack_path in self._active_pack_files:
@@ -306,19 +320,16 @@ class TTRPGContextEngine(ContextEngine):
                 content = pack_path.read_text(encoding="utf-8")
             except (FileNotFoundError, OSError, UnicodeDecodeError):
                 continue
-            # Resolve a human-readable label relative to the packs dir
-            # when we know it, so the repasted block is self-describing.
-            label = pack_path.name
-            if (
-                self._packs_dir is not None
-                and self._packs_dir in pack_path.parents
-            ):
-                try:
-                    label = str(
-                        pack_path.relative_to(self._packs_dir).with_suffix("")
-                    )
-                except ValueError:
-                    label = pack_path.name
+            # Resolve a human-readable label by finding the pack-skill
+            # root that contains the file. The pack-skill directory's
+            # name is the slash-command name the GM typed, so it
+            # doubles as the self-describing label (e.g.
+            # "ttrpg-mistborn" instead of "SKILL.md").
+            label = pack_path.parent.name or pack_path.name
+            for root in self._pack_skill_roots:
+                if root in pack_path.parents or pack_path.parent == root:
+                    label = root.name
+                    break
             messages.append(
                 {
                     "role": "system",

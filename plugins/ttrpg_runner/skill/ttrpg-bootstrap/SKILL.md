@@ -21,35 +21,45 @@ Both skills live in the same plugin (`ttrpg-runner`) and share the same session 
 
 `/ttrpg-bootstrap` should tell the player, early and plainly, that these settings are natively supported:
 
-- `cyberpunk`
-- `dnd`
-- `mistborn` (single pack with `Era 1` or `Era 2` sections selected by `mistborn_era`)
-- `pokemon`
-- `expanse`
+- `cyberpunk` (`/ttrpg-cyberpunk`)
+- `dnd` (`/ttrpg-dnd`)
+- `mistborn` (`/ttrpg-mistborn`, with an `Era 1` / `Era 2` follow-up question for the era file)
+- `pokemon` (`/ttrpg-pokemon`)
+- `expanse` (`/ttrpg-expanse`)
 
 If the requested game is outside that list, say that any TTRPG is still possible but the session will run with reduced features: no native flavor pack and no pack-specific reference set.
 
-## Mistborn Pack Layout
+## Pack Skill Layout
 
-`mistborn` uses a base `PACK.md` plus exactly one era file in the `resources/` folder.
+Each flavor pack ships as its own first-class skill in the plugin. Every pack skill is a directory named `ttrpg-<pack>` containing a `SKILL.md` (the always-on ruleset for that pack) and, when the pack has era-specific or setting-specific submaterial, a `resources/` subdirectory. The agent loads packs through the standard `skill_view` tool:
 
-- Ask for `Era 1` or `Era 2` before character creation or worldbuilding.
-- Load `flavorpacks/mistborn/PACK.md` as the always-on ruleset.
-- Load the matching era file: `flavorpacks/mistborn/resources/mistborn_era_1.md` or `flavorpacks/mistborn/resources/mistborn_era_2.md`.
-- Record the answer in the `story.md` header block (see "Session Metadata" below) so a resumed session remembers it.
-- Read exactly one era file per Mistborn session, paired with the base `PACK.md`. Era content lives in `mistborn/resources/` alongside the base pack.
+- `skill_view("ttrpg-<pack>")` reads the base `SKILL.md` of the pack
+- `skill_view("ttrpg-<pack>", "resources/<file>.md")` reads a specific reference inside the pack
+
+This matches the standard Hermes skill layout, so any future pack (and any future era / subpack) follows the same pattern. Mistborn is the existing example that already uses `resources/` for its era files.
+
+### Mistborn subpack flow
+
+Mistborn is a two-file pack: the base `SKILL.md` (always on) plus exactly one era file from `ttrpg-mistborn/resources/`. The two are tightly coupled — the base pack says "read this with one era file," and a single era file is useless without the base pack. The era answer is the gate that triggers both files to load in the same turn.
+
+1. As soon as the player says they want Mistborn, ask for `Era 1` or `Era 2` and **wait** for the answer. Do not start loading the base pack yet — the era you pair it with is fixed by their answer.
+2. The instant the player answers (e.g. "era 1" / "the final empire"), load both in the same turn, before any other step:
+   - `skill_view("ttrpg-mistborn")` — the always-on Mistborn ruleset
+   - `skill_view("ttrpg-mistborn", "resources/era_1.md")` *or* `skill_view("ttrpg-mistborn", "resources/era_2.md")` — whichever era they chose
+   Loading the era file is part of resolving native support, not a follow-up you can defer. If the era file is not in scope, the base pack is not fully usable.
+3. Record the era in the `story.md` Session Metadata block (see "Session Metadata" below) so a resumed session remembers it.
+4. Read exactly one era file per Mistborn session, paired with the base `SKILL.md`. Era content lives in `ttrpg-mistborn/resources/` alongside the base pack.
 
 ## Flavor Pack Loading Rules
 
 These rules are mandatory. They exist to stop cross-setting contamination while still allowing intentional crossovers of two native packs.
 
 - Determine the requested setting before you worldbuild. If the player has not named a setting, ask.
-- If the player names a single native setting, load `flavorpacks/<pack>/PACK.md`. Single-setting play is single-pack.
-- If the player explicitly names a crossover of two native settings, load BOTH `flavorpacks/<pack>/PACK.md` files, record both pack names in the `story.md` header block, and treat the session as a native crossover. Each pack keeps its own rules, tone, and reference tree; the player and GM blend them at the table. Do not silently demote a native crossover to generic mode.
-- When a crossover has two systems that conflict (stat blocks, magic systems, tech trees, damage scales, progression, etc.), the GM must ask the player how to resolve the conflict before worldbuilding. Do not pick silently. Examples: "Do we use the `cyberpunk` stat block or the `pokemon` stat block?", "Which magic/tech system applies, and how do the other system's powers map onto it?", "How does damage scale across both?", "How does progression work?". Record the player's answers in the `story.md` header block and stick to them for the whole session.
+- If the player names a single native setting, load that pack's base `SKILL.md` with `skill_view("ttrpg-<pack>")` (and any required `resources/` file for that pack). Single-setting play is single-pack.
+- If the player explicitly names a crossover of two native settings, load BOTH packs' base `SKILL.md` files, record both pack names in the `story.md` header block, and treat the session as a native crossover. Each pack keeps its own rules, tone, and reference tree; the player and GM blend them at the table. Do not silently demote a native crossover to generic mode.
+- When a crossover has two systems that conflict (stat blocks, magic systems, tech trees, damage scales, progression, etc.), the GM must ask the player how to resolve the conflict before worldbuilding. Do not pick silently. Examples: "Do we use the `ttrpg-cyberpunk` stat block or the `ttrpg-pokemon` stat block?", "Which magic/tech system applies, and how do the other system's powers map onto it?", "How does damage scale across both?", "How does progression work?". Record the player's answers in the `story.md` header block and stick to them for the whole session.
 - Only read deeper pack references from a pack that is active in the current session. A pack that is not loaded in this session must never be consulted.
-- Within an active pack, only read deeper references from that same pack. A `cyberpunk` reference is not a valid source for a `pokemon` beat and vice versa, even in a crossover; each pack's own rules and tone stay internally consistent.
-- If the player says `cyberpunk` and nothing else, do not load `pokemon`. If the player says `cyberpunk + pokemon` (or any other explicit crossover), load both.
+- If the player says `cyberpunk` and nothing else, do not load `pokemon`. If the player says `cyberpunk + pokemon` (or any other explicit crossover), load both. In this case, you may access resources from both packs.
 - If the player changes settings mid-conversation, stop and confirm whether they want to abandon the current session and start a new one, or shift the current session into a new single-pack or crossover mode.
 - A crossover that includes a non-native setting runs in generic mode for the unsupported portion. Do not load native-pack reference docs in generic mode, and do not blend native-pack docs into a generic session.
 
@@ -81,36 +91,35 @@ Use this skill when the player wants to:
 
 ## Skill Layout
 
-This skill lives inside the plugin's own `skill/ttrpg-bootstrap/` folder so it travels with the code that bundles it. The companion `ttrpg-recover` skill lives next to it in `skill/ttrpg-recover/`. Hermes loads them via `skill_view("ttrpg-runner:ttrpg-bootstrap")` and `skill_view("ttrpg-runner:ttrpg-recover")`.
+Every skill in this plugin lives as its own first-class skill directory under `skill/`, so it can be installed, symlinked, and loaded with `skill_view` exactly the same way as a built-in Hermes skill. The session bootstrap and post-compaction skills sit alongside the flavor-pack skills; the templates folder stays under `ttrpg-bootstrap` because it is bootstrap-only scratch.
 
 ```text
 skill/
-  ttrpg-bootstrap/
-    SKILL.md                       # this file
+  ttrpg-bootstrap/                # /ttrpg-bootstrap slash command
+    SKILL.md                      # this file
     templates/
       character.md
       event.md
       location.md
       secrets.md
       session-summary.md
-    flavorpacks/
-      core/                        # always-on common rules and tips
-        PACK.md                    # loaded for every session, any setting
-      cyberpunk/
-        PACK.md                    # base pack, no subpacks
-      dnd/
-        PACK.md
-      pokemon/
-        PACK.md
-      expanse/
-        PACK.md
-      mistborn/
-        PACK.md                    # canonical Mistborn ruleset, always on
-        resources/
-          mistborn_era_1.md        # Era 1: Final Empire, Terris, Skaa, Heroes of the Trilogy
-          mistborn_era_2.md        # Era 2: Industrial Scadrial, Elendel, the Roughs, Nobles
-  ttrpg-recover/
-    SKILL.md                       # post-compaction recovery instructions
+  ttrpg-recover/                  # /ttrpg-recover slash command
+    SKILL.md                      # post-compaction recovery instructions
+  ttrpg-core/                     # /ttrpg-core - always-on common rules
+    SKILL.md
+  ttrpg-cyberpunk/                # /ttrpg-cyberpunk
+    SKILL.md                      # base pack, no subpacks
+  ttrpg-dnd/                      # /ttrpg-dnd
+    SKILL.md
+  ttrpg-pokemon/                  # /ttrpg-pokemon
+    SKILL.md
+  ttrpg-expanse/                  # /ttrpg-expanse
+    SKILL.md
+  ttrpg-mistborn/                 # /ttrpg-mistborn
+    SKILL.md                      # base pack (always on once era is chosen)
+    resources/
+      era_1.md                    # Era 1: Final Empire, Terris, Skaa, Heroes of the Trilogy
+      era_2.md                    # Era 2: Industrial Scadrial, Elendel, the Roughs, Nobles
 ```
 
 ## Active Session Directory
@@ -177,8 +186,8 @@ The first thing inside `story.md` is a small block that records the session's id
    When you walk the player through character creation, propose at least one suggested initial loadout (starting gear, resources, and any setting-specific kits such as Mistborn metals, Cyberpunk cyberware, or DND 5e starting equipment) and let the player accept, modify, or swap it. Surface this offer before the character sheet is locked so the player always has concrete starting options on the table.
 
 2. Resolve native support.
-   If the setting is a single native pack (`cyberpunk`, `dnd`, `mistborn`, `pokemon`, or `expanse`), say it is natively supported and load that pack's `PACK.md`. For `mistborn`, the main `mistborn/PACK.md` is the always-on ruleset; the era-specific material lives in `mistborn/resources/mistborn_era_1.md` or `mistborn/resources/mistborn_era_2.md`. Load both the base `PACK.md` and the chosen era file for any Mistborn session.
-   If the setting is an explicit crossover of two native packs, say both are natively supported, load both base `PACK.md` files and treat the session as a native crossover. Only ask the `mistborn` era question if `mistborn` is one of the active packs.
+   If the setting is a single native pack (`cyberpunk`, `dnd`, `mistborn`, `pokemon`, or `expanse`), say it is natively supported and load that pack's base `SKILL.md` with `skill_view("ttrpg-<pack>")`. For `mistborn`, the era question from step 1 is the gate: do not start loading the base pack until the player has picked an era, and the moment they answer, load `skill_view("ttrpg-mistborn")` together with `skill_view("ttrpg-mistborn", "resources/era_1.md")` or `skill_view("ttrpg-mistborn", "resources/era_2.md")` in the same turn. A Mistborn session without its era file is incomplete; do not move on to character creation, worldbuilding, or scene narration until both files are in scope.
+   If the setting is an explicit crossover of two native packs, say both are natively supported, load both base `SKILL.md` files with `skill_view` and treat the session as a native crossover. Only ask the `mistborn` era question if `mistborn` is one of the active packs.
    If it is anything else (a non-native setting, or a crossover involving a non-native setting), say the game is still possible with reduced features and stay in generic mode.
 
 3. Resolve the base directory.
@@ -186,10 +195,10 @@ The first thing inside `story.md` is a small block that records the session's id
 
 4. Load native-pack references only when needed.
    For each active pack, read only that pack's docs.
-   Start with `flavorpacks/<pack>/PACK.md` for every active pack. Open deeper markdown files from the same pack only when the current turn actually needs them.
-   For `mistborn`, the main `mistborn/PACK.md` is the always-on ruleset (dice, magic, character sheet, conflicts, damage, missions, and pack-wide events). The `mistborn/resources/mistborn_era_1.md` or `mistborn/resources/mistborn_era_2.md` file adds era-specific setting, factions, missions, and events. Read era files only when the active session's `mistborn_era` calls for them.
-   **The core pack is always on.** Before the first scene of any session (native, native crossover, or generic mode), read `flavorpacks/core/PACK.md`. It holds the setting-agnostic operating rules the GM needs every turn: Discord output formatting, the whitespace discipline rule, multiplayer turn management, dice-and-roll interleaving, and the roll display format. The `post_tool_call` hook tags that file as a required asset pack the moment it is read, so the context engine repastes it after every compression boundary. Treat the core pack as required reading, not optional context, and keep its rules in scope for the rest of the run.
-   Load order is core first, then the chosen setting pack. The `flavorpacks/core/PACK.md` file is the only source of truth for the always-on common rules.
+   Start with `skill_view("ttrpg-<pack>")` for every active pack — that returns the base `SKILL.md`. Open deeper markdown files from the same pack with `skill_view("ttrpg-<pack>", "resources/<file>.md")` only when the current turn actually needs them.
+   For `mistborn`, the base `SKILL.md` is the always-on ruleset (dice, magic, character sheet, conflicts, damage, missions, and pack-wide events). The `resources/era_1.md` or `resources/era_2.md` file adds era-specific setting, factions, missions, and events. Read era files only when the active session's `mistborn_era` calls for them.
+   **The core pack is always on.** Before the first scene of any session (native, native crossover, or generic mode), load `ttrpg-core` with `skill_view("ttrpg-core")`. It holds the setting-agnostic operating rules the GM needs every turn: Discord output formatting, the whitespace discipline rule, multiplayer turn management, dice-and-roll interleaving, and the roll display format. The `post_tool_call` hook tags that skill as an active pack the moment it is read, so the context engine repastes it after every compression boundary. Treat the core pack as required reading, not optional context, and keep its rules in scope for the rest of the run.
+   Load order is core first, then the chosen setting pack. The `ttrpg-core` skill is the only source of truth for the always-on common rules.
 
 5. Create or resume a session by hand.
    Hermes manages the session directory directly with its file tools.
@@ -254,8 +263,8 @@ What belongs in `secrets.md` includes: hidden NPC agendas, true identities, secr
 ## Reference
 
 - `ttrpg_roll` plugin tool - fair dice rolling via Python's uniform `randint`.
-- `load_ttrpg_context_files(session_id)` plugin tool (used by `ttrpg-recover`) - returns the list of asset packs the active session has loaded, so the post-compaction GM can decide which to reload. **The list is generated automatically**: the `post_tool_call` hook watches every file the GM reads and registers any asset pack (`PACK.md` under `skill/ttrpg-bootstrap/flavorpacks/`) the moment it enters scope. The skill never has to call this list-builder by hand; the hook does it for free. This tool is only for *reading* the list, not for adding to it.
-- `flavorpacks/core/PACK.md` - the always-on common-rules asset pack (Discord formatting, whitespace discipline, multiplayer turn management, dice-and-roll interleaving, roll display format). Read it once at the start of every session, before the first scene, and keep its rules in scope for the rest of the run. The `post_tool_call` hook tags it as an active pack so the context engine repastes it after every compression boundary.
+- `load_ttrpg_context_files(session_id)` plugin tool (used by `ttrpg-recover`) - returns the list of asset packs the active session has loaded, so the post-compaction GM can decide which to reload. **The list is generated automatically**: the `post_tool_call` hook watches every file the GM reads and registers any active pack (`SKILL.md` under one of the plugin's `ttrpg-<pack>/` skill directories) the moment it enters scope. The skill never has to call this list-builder by hand; the hook does it for free. This tool is only for *reading* the list, not for adding to it.
+- `ttrpg-core` - the always-on common-rules skill (Discord formatting, whitespace discipline, multiplayer turn management, dice-and-roll interleaving, roll display format). Load it once at the start of every session with `skill_view("ttrpg-core")`, before the first scene, and keep its rules in scope for the rest of the run. The `post_tool_call` hook tags it as an active pack so the context engine repastes it after every compression boundary.
 - `templates/character.md` - canonical markdown sheet for PCs, companions, and NPCs. Use this instead of any JSON shape.
 - `templates/secrets.md` - GM-only secrets ledger; never printed in chat.
 - The companion skill `ttrpg-recover` is loaded automatically after a context-engine compression; switch into it the moment a "Session Data Update Required" bridge message appears in the working context.
@@ -274,7 +283,8 @@ What belongs in `secrets.md` includes: hidden NPC agendas, true identities, secr
 - Do not print the contents of `secrets.md` (or any paraphrase, hint, or spoiler-tagged copy of it) into player-facing chat. The instant a secret is rendered to a player it stops being a secret.
 - Do not store character stats, skills, derived values, inventory, or XP in JSON. Character sheets are markdown; the data files hold the campaign state. There is no `session.json` to duplicate into.
 - Do not invoke `ttrpg-recover` outside of a real compression boundary. The recovery skill is for post-compaction work, not for normal play.
-- Do not skip the core pack or load it "only when needed." `flavorpacks/core/PACK.md` is required reading for every session; load it at the start of every session and keep its guidance in scope, just like the setting pack.
+- Do not skip the core pack or load it "only when needed." `ttrpg-core` is required reading for every session; load it with `skill_view("ttrpg-core")` at the start of every session and keep its guidance in scope, just like the setting pack.
+- Do not answer a Mistborn era question and then move on. The era answer is the trigger: in the same turn, run `skill_view("ttrpg-mistborn")` and `skill_view("ttrpg-mistborn", "resources/era_1.md")` (or `resources/era_2.md`) before doing anything else. Asking the era question without loading the era file leaves the base pack half-loaded.
 
 ## Verification
 
@@ -282,7 +292,7 @@ The skill is working correctly when all of the following are true:
 
 - The agent tells the player that `cyberpunk`, `dnd`, `mistborn`, `pokemon`, and `expanse` are natively supported.
 - The agent also says unsupported TTRPGs are possible with reduced features.
-- For `mistborn`, the agent asks for `Era 1` or `Era 2`, records it in the `story.md` Session Metadata block, and loads `mistborn/resources/mistborn_era_1.md` or `mistborn/resources/mistborn_era_2.md` alongside the base `mistborn/PACK.md`.
+- For `mistborn`, the agent asks for `Era 1` or `Era 2`, records it in the `story.md` Session Metadata block, and loads `skill_view("ttrpg-mistborn")` together with `skill_view("ttrpg-mistborn", "resources/era_1.md")` or `skill_view("ttrpg-mistborn", "resources/era_2.md")`.
 - Only the chosen native pack is loaded for a native game.
 - No database bootstrap or search step is required for play.
 - The active session folder contains `story.md`, `timeline.md`, `gm-notes.md`, `secrets.md`, and the `characters/`, `locations/`, `events/`, and `rolls/` directories.
@@ -290,5 +300,5 @@ The skill is working correctly when all of the following are true:
 - The current scene's new facts are written back into the active session's files using Hermes file tools.
 - No scene content was produced by mixing another flavor pack or another saved session into the current one.
 - Player-facing output uses Discord-native markdown: `###` scene headers, `**bold**` anchors, `>` block quotes for NPC speech, fenced code blocks for dice cards, and `-#` for ambient tags.
-- `flavorpacks/core/PACK.md` was loaded at the start of the session and remains in scope, including the whitespace discipline rule.
+- `ttrpg-core` was loaded with `skill_view("ttrpg-core")` at the start of the session and remains in scope, including the whitespace discipline rule.
 - Every markdown file the agent brought into context during the run was registered automatically by the `post_tool_call` hook, so `load_ttrpg_context_files(session_id)` can return the full list of asset packs the session used (with the core pack always present).

@@ -1,3 +1,11 @@
+---
+name: ttrpg-expanse
+description: The Expanse-flavored setting pack for ttrpg-runner. Hard-SF pressure from physics, politics, and scarcity. Load only when the player explicitly wants Expanse-style near-future play.
+version: 3.0.0
+author: OpenAI
+platforms: [linux, macos, windows]
+---
+
 # Expanse Flavor Pack
 
 Load this pack only when the player explicitly wants The Expanse style of near-future hard-SF play with native support.

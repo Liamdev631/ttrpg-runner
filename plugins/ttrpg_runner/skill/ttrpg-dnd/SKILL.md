@@ -1,3 +1,11 @@
+---
+name: ttrpg-dnd
+description: Heroic-fantasy setting pack for ttrpg-runner. Wonder, danger, ruins, politics, monsters, and difficult heroism. Load only when the player explicitly wants DND-style play.
+version: 3.0.0
+author: OpenAI
+platforms: [linux, macos, windows]
+---
+
 # DND Flavor Pack
 
 Load this pack only when the player explicitly wants DND, Dungeons and Dragons, or classic heroic fantasy with native support.

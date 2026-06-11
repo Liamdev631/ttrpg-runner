@@ -1,6 +1,6 @@
 # Mistborn Era 2
 
-Use this file with `PACK.md` for post-Catacendre games in the Alloy of Law era and later Era 2 play.
+Use this file with `SKILL.md` for post-Catacendre games in the Alloy of Law era and later Era 2 play.
 
 The source repo is still mostly Era 1 material, so this file is intentionally short and focuses on the gameplay-relevant changes a GM needs.
 
@@ -143,7 +143,7 @@ GM takeaways:
 
 If you borrow from the repo's Era 1 supplements, use this filter:
 
-- keep shared core rules from `PACK.md`
+- keep shared core rules from `SKILL.md`
 - drop skaa-only mechanics unless fully rewritten
 - keep Terris material when it still fits the new social order
 - keep noble lineage only after rewriting it away from legal caste privilege

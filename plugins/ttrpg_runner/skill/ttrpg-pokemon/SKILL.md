@@ -1,3 +1,11 @@
+---
+name: ttrpg-pokemon
+description: Pokemon-flavored setting pack for ttrpg-runner. Friendship, discovery, ecosystems, travel, and rivalry without cruelty as the default mode. Load only when the player explicitly wants Pokemon-style play.
+version: 3.0.0
+author: OpenAI
+platforms: [linux, macos, windows]
+---
+
 # Pokemon Flavor Pack
 
 Load this pack only when the player explicitly wants Pokemon-style play with native support.

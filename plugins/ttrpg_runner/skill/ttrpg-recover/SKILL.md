@@ -47,7 +47,7 @@ already done three things:
 
 1. **Kept the first system message verbatim.** The GM's core
    instructions are still on top.
-2. **Re-pasted the active pack's `PACK.md` files** into the
+2. **Re-pasted the active pack's `SKILL.md` files** into the
    compressed context, in full, in load order. The agent still has
    the operating rules of the active setting without needing a
    fresh file read.

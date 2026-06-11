@@ -1,3 +1,11 @@
+---
+name: ttrpg-core
+description: Always-on common rules for every ttrpg-runner session: Discord output formatting, whitespace discipline, multiplayer turn management, dice-and-roll interleaving, and the roll display format. Load before the first scene of any session.
+version: 3.0.0
+author: OpenAI
+platforms: [linux, macos, windows]
+---
+
 # Core Flavor Pack
 
 This is the **always-on** asset pack for every `ttrpg-runner` session. The
@@ -10,8 +18,8 @@ which flavor pack (or generic mode) the player picked.
 
 Load order:
 
-1. `flavorpacks/core/PACK.md` (this file) - common rules and tips, always on.
-2. `flavorpacks/<pack>/PACK.md` - the player's chosen setting. Skip in generic mode.
+1. `ttrpg-core` (this file) - common rules and tips, always on.
+2. `ttrpg-<pack>` - the player's chosen setting. Skip in generic mode.
 
 The recovery skill depends on this pack being repasted after a
 compression boundary; the operating rules below are not optional.

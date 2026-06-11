@@ -1,9 +1,17 @@
+---
+name: ttrpg-mistborn
+description: Mistborn-flavored setting pack for ttrpg-runner. The base pack is the always-on Mistborn ruleset; pair it with exactly one era file from resources/ (era_1.md or era_2.md) based on the player answer. Load only when the player explicitly wants a Mistborn game.
+version: 3.0.0
+author: OpenAI
+platforms: [linux, macos, windows]
+---
+
 # Mistborn GM Pack
 
 This is a lightweight GM-facing split of the source primer. Read this file together with exactly one era file:
 
-- `resources/mistborn_era_1.md`
-- `resources/mistborn_era_2.md`
+- `resources/era_1.md`
+- `resources/era_2.md`
 
 The goal is speed at the table, not full lore coverage.
 

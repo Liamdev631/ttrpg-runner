@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 PLUGIN_DIR = lib.PLUGIN_DIR
 BUNDLED_SKILLS = lib.BUNDLED_SKILLS
-FLAVORPACKS_DIR = lib.FLAVORPACKS_DIR
+PACK_SKILL_ROOTS = lib.PACK_SKILL_ROOTS
 
 
 # ---------------------------------------------------------------------------
@@ -101,8 +101,8 @@ def _on_pre_tool_call(
 
 
 def make_post_tool_call_hook(engine: TTRPGContextEngine):
-    """Return a ``post_tool_call`` hook that watches for flavor-pack
-    ``PACK.md`` reads and registers them as active packs on the engine.
+    """Return a ``post_tool_call`` hook that watches for pack-skill
+    ``SKILL.md`` reads and registers them as active packs on the engine.
     """
 
     def _on_post_tool_call(
@@ -127,11 +127,11 @@ def make_post_tool_call_hook(engine: TTRPGContextEngine):
                 payload,
             )
 
-        # Active-pack tracking: if the GM just read a flavor-pack
-        # PACK.md, register it on the engine so the next compression
+        # Active-pack tracking: if the GM just read a pack skill's
+        # SKILL.md, register it on the engine so the next compression
         # repastes it into the working context.
         for path_arg in _extract_path_args(args):
-            if lib.is_flavor_pack_pack_md(path_arg):
+            if lib.is_pack_skill_md(path_arg):
                 engine.register_active_pack(path_arg)
                 logger.debug(
                     "ttrpg-runner: registered active pack %s via %s",
@@ -201,7 +201,7 @@ def _register_context_engine(ctx: Any) -> None:
     engine = TTRPGContextEngine(
         context_length=context_length,
         threshold_ratio=threshold_ratio,
-        packs_dir=FLAVORPACKS_DIR,
+        pack_skill_roots=PACK_SKILL_ROOTS,
     )
     if hasattr(ctx, "register_context_engine"):
         try:

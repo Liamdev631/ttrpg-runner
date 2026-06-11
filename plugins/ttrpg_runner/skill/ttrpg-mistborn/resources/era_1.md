@@ -1,6 +1,6 @@
 # Mistborn Era 1
 
-Use this file with `PACK.md` for games set during the Final Empire and the original trilogy.
+Use this file with `SKILL.md` for games set during the Final Empire and the original trilogy.
 
 This file only covers things that are specific to Era 1.
 

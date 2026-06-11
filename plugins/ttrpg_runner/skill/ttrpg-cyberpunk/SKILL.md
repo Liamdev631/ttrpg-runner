@@ -1,3 +1,11 @@
+---
+name: ttrpg-cyberpunk
+description: Cyberpunk-flavored setting pack for ttrpg-runner. Street-level jobs, debt, surveillance, and HEAT. Load only when the player explicitly wants a cyberpunk game.
+version: 3.0.0
+author: OpenAI
+platforms: [linux, macos, windows]
+---
+
 # Cyberpunk Flavor Pack
 
 ## Citations
