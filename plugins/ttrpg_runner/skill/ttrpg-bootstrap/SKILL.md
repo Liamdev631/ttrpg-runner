@@ -98,6 +98,8 @@ skill/
       session-summary.md
   ttrpg-core/                     # /ttrpg-core - always-on common rules
     SKILL.md
+  ttrpg-clean/                    # /ttrpg-clean - compact and dedupe session files
+    SKILL.md
   ttrpg-cyberpunk/                # /ttrpg-cyberpunk
     SKILL.md                      # base pack, no subpacks
   ttrpg-dnd/                      # /ttrpg-dnd
@@ -123,8 +125,7 @@ Configured `ttrpg_runner.base_dir` (default `~/.hermes/ttrpg-runner`) is the roo
     <session-id>/
       story.md            # running fiction + session metadata header
       timeline.md         # beat-by-beat chronology
-      gm-notes.md         # hidden planning
-      secrets.md          # GM-only truths
+      secrets.md          # GM-only truths, twists, and behind-the-screen planning
       characters/         # markdown dossiers
       locations/
       events/
@@ -135,14 +136,25 @@ Configured `ttrpg_runner.base_dir` (default `~/.hermes/ttrpg-runner`) is the roo
 
 - `story.md` — running fiction and scene recap. Opens with a `> Session Metadata` block that records the selected game, active flavor packs, support level, mistborn era (when relevant), and session start time. The metadata block is the only place the campaign's identity is persisted.
 - `timeline.md` — concise beat-by-beat chronology.
-- `gm-notes.md` — hidden planning notes, stakes, and hooks.
-- `secrets.md` — GM-only truths that must never be printed in player chat (hidden agendas, true identities, ticking bombs, GM-triggered twists).
+- `secrets.md` — GM-only file. Holds two things, both of which must never be printed in player chat: (1) `Active Secrets` / `Burned Secrets` (hidden agendas, true identities, ticking bombs, GM-triggered twists) and (2) `GM Planning Notes` (open clocks, stakes, hooks, what to do if the players go off-script). The old `gm-notes.md` file is gone; everything the GM keeps behind the screen lives in this one file.
 - `characters/<slug>.md` — canonical markdown sheets for PCs, companions, and important NPCs. Plain text, no JSON parsing.
 - `locations/<slug>.md` — named places with sensory details and hidden layers.
 - `events/<slug>.md` — missions, incidents, betrayals, and turning points.
 - `rolls/<stamp>-<label>.json` — optional audit trail for important dice calls.
 
 There is no separate `session.json`. The data files (above) are the canonical state; adding a `session.json` mirror would duplicate that state and risk drift, so the plugin does not maintain one.
+
+## Append-Only Session Files
+
+The data files in a session folder are **append-only**. This is a deliberate performance rule, not a suggestion.
+
+- **What "append-only" means.** Every write to a session file adds new content at the end (a new timeline entry, a new beat in `story.md`, a new secret, a new planning note, a new dossier, a new roll). The model never opens an existing session file, reads it, edits a line, and saves it back. That round-trip is exactly what we are avoiding.
+- **Why it matters.** Skim, append, close. Skim, append, close. That is the steady-state loop the GM runs on every turn. Open-read-edit-save invites stale-context bugs, partial overwrites, and accidentally rewriting a fact the table has already accepted as canon. Append-only writes are O(1) and cannot lose what the table already saw.
+- **How it stays small.** Files grow, so the plugin ships a `ttrpg-clean` skill. The player or the GM runs `/ttrpg-clean` when a file is getting long; the LLM then opens that one file, merges redundant entries, drops resolved and stale items, and rewrites the file under 100 lines. `/ttrpg-clean` is the only sanctioned read-modify-write path for session data.
+- **Where append-only does not apply.** The first write of a brand-new session still seeds each file from its template (this is bootstrap, not in-flight play). The Session Metadata header at the top of `story.md` is updated in place on resume (it is the identity record, not a beat). Dossier files for a specific character, location, or event are the dossier for that one entity and are appended to as that entity evolves; they are not edited retroactively to rewrite an entity's history.
+- **If you catch yourself editing in place, stop.** Use the append path. If the append path cannot express the change, run `/ttrpg-clean` and let the compactor rewrite the file.
+
+This rule is load-bearing. If a turn would otherwise require editing a session file in place, change the beat so it does not, or queue the change for the next `/ttrpg-clean`.
 
 ## Session Metadata
 
@@ -194,7 +206,7 @@ The first thing inside `story.md` is a small block that records the session's id
 5. Create or resume a session by hand.
    Hermes manages the session directory directly with its file tools.
 
-   - New session: create a fresh `<session-id>` folder and seed `story.md` (with the Session Metadata block, see above), `timeline.md`, `gm-notes.md`, `secrets.md`, and the `characters/`, `locations/`, `events/`, and `rolls/` directories. Use `templates/secrets.md` as the starting shape for `secrets.md` so the GM-only banner and the "do not print" rules are present from the first turn. There is no `session.json` to seed - the metadata header inside `story.md` is the identity record.
+   - New session: create a fresh `<session-id>` folder and seed `story.md` (with the Session Metadata block, see above), `timeline.md`, `secrets.md`, and the `characters/`, `locations/`, `events/`, and `rolls/` directories. Use `templates/secrets.md` as the starting shape for `secrets.md` so the GM-only banner, the append-only rule, the "do not print" rules, and the `GM Planning Notes` section are present from the first turn. There is no `session.json` to seed - the metadata header inside `story.md` is the identity record. There is no `gm-notes.md`; the planning space lives in `secrets.md` under `GM Planning Notes`.
    - Resume flow: list the saved sessions, let the player choose one, then read only that session's files. The Session Metadata header in `story.md` tells you what game, packs, era, and support level to reload.
 
 6. Record the chosen game in the `story.md` Session Metadata block.
@@ -238,7 +250,7 @@ Some facts in a session belong to the GM and the GM alone. The moment one of tho
 
 Every active session ships with a `secrets.md` file seeded from `templates/secrets.md`. The template's banner is not decoration; it is the operational rule.
 
-- **Storage.** Put every GM-only truth in `secrets.md`. The file lives next to `gm-notes.md` and is read by the GM, not the table.
+- **Storage.** Put every GM-only truth in `secrets.md`. The file also holds `GM Planning Notes` for behind-the-screen planning, so the GM does not need a separate planning file. The file is read by the GM, not the table, and is append-only (see "Append-Only Session Files" above).
 - **Never print.** Do not paste `secrets.md` contents, summaries, paraphrases, hints, or confirmations into any player-facing Discord message. Spoiler tags do not count; anything the player can click to reveal has already been exposed.
 - **No soft reveals.** Do not let an NPC, ambient insert, or "as you recall" passage leak a secret by accident. If a secret is in `secrets.md`, it does not appear in the fiction until the GM deliberately opens the door.
 - **Refuse close guesses politely.** If a player gets hot and names a secret out loud, the GM does not confirm, deny, or echo it. Answer in the GM voice, redirect the spotlight, and let the table earn the reveal through play.
@@ -254,8 +266,9 @@ What belongs in `secrets.md` includes: hidden NPC agendas, true identities, secr
 
 - `ttrpg_roll` plugin tool - fair dice rolling via Python's uniform `randint`.
 - `ttrpg-core` - the always-on common-rules skill (Discord formatting, whitespace discipline, multiplayer turn management, dice-and-roll interleaving, roll display format). Load it once at the start of every session with `skill_view("ttrpg-core")`, before the first scene, and keep its rules in scope for the rest of the run.
+- `ttrpg-clean` - the compactor skill. The only sanctioned read-modify-write path for session data. Run `/ttrpg-clean` when a session file is getting long and the LLM will open that file, merge redundant entries, drop resolved and stale items, and rewrite it under 100 lines. See "Append-Only Session Files" above for why this exists.
 - `templates/character.md` - canonical markdown sheet for PCs, companions, and NPCs. Use this instead of any JSON shape.
-- `templates/secrets.md` - GM-only secrets ledger; never printed in chat.
+- `templates/secrets.md` - GM-only file; holds `Active Secrets`, `Burned Secrets`, and `GM Planning Notes`. Never printed in chat.
 
 ## Pitfalls
 
@@ -272,6 +285,7 @@ What belongs in `secrets.md` includes: hidden NPC agendas, true identities, secr
 - Do not store character stats, skills, derived values, inventory, or XP in JSON. Character sheets are markdown; the data files hold the campaign state. There is no `session.json` to duplicate into.
 - Do not skip the core pack or load it "only when needed." `ttrpg-core` is required reading for every session; load it with `skill_view("ttrpg-core")` at the start of every session and keep its guidance in scope, just like the setting pack.
 - Do not answer a Mistborn era question and then move on. The era answer is the trigger: in the same turn, run `skill_view("ttrpg-mistborn")` and `skill_view("ttrpg-mistborn", "resources/era_1.md")` (or `resources/era_2.md`) before doing anything else. Asking the era question without loading the era file leaves the base pack half-loaded.
+- Do not edit a session file in place to rewrite history. Session files are append-only. The only sanctioned read-modify-write path is `/ttrpg-clean`. If a turn feels like it needs a hand-edit, change the beat or queue it for the next clean.
 
 ## Verification
 
@@ -282,9 +296,10 @@ The skill is working correctly when all of the following are true:
 - For `mistborn`, the agent asks for `Era 1` or `Era 2`, records it in the `story.md` Session Metadata block, and loads `skill_view("ttrpg-mistborn")` together with `skill_view("ttrpg-mistborn", "resources/era_1.md")` or `skill_view("ttrpg-mistborn", "resources/era_2.md")`.
 - Only the chosen native pack is loaded for a native game.
 - No database bootstrap or search step is required for play.
-- The active session folder contains `story.md`, `timeline.md`, `gm-notes.md`, `secrets.md`, and the `characters/`, `locations/`, `events/`, and `rolls/` directories.
+- The active session folder contains `story.md`, `timeline.md`, `secrets.md`, and the `characters/`, `locations/`, `events/`, and `rolls/` directories. There is no `gm-notes.md`.
 - The Session Metadata block at the top of `story.md` records the selected game, flavor packs, support level, and (when relevant) mistborn era.
 - The current scene's new facts are written back into the active session's files using Hermes file tools.
 - No scene content was produced by mixing another flavor pack or another saved session into the current one.
 - Player-facing output uses Discord-native markdown: `###` scene headers, `**bold**` anchors, `>` block quotes for NPC speech, fenced code blocks for dice cards, and `-#` for ambient tags.
 - `ttrpg-core` was loaded with `skill_view("ttrpg-core")` at the start of the session and remains in scope, including the whitespace discipline rule.
+- In-flight turns append to session files instead of editing them in place; when a file grows past a comfortable size, `/ttrpg-clean` is invoked rather than a hand-edit.

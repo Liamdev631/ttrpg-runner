@@ -65,8 +65,7 @@ into another.
 sessions/<your-session>/
   story.md        running fiction and the campaign header
   timeline.md     beat-by-beat chronology
-  gm-notes.md     hidden planning the GM keeps behind the screen
-  secrets.md      GM-only truths and twists
+  secrets.md      GM-only truths, twists, and behind-the-screen planning
   characters/     markdown dossiers for the cast
   locations/      markdown dossiers for places
   events/         markdown dossiers for missions and turning points
