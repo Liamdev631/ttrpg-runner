@@ -9,20 +9,16 @@ platforms: [linux, macos, windows]
 # Core Flavor Pack
 
 This is the **always-on** asset pack for every `ttrpg-runner` session. The
-bootstrap skill loads it before the first scene, and the
-`post_tool_call` hook registers it on the context engine so every
-compression boundary repastes it into the working context alongside the
-chosen setting pack. The rules here are setting-agnostic: they govern
-how the GM renders scenes, rolls dice, and runs the table, no matter
-which flavor pack (or generic mode) the player picked.
+bootstrap skill loads it before the first scene, so the operating rules
+below are in scope for the rest of the run. The rules are
+setting-agnostic: they govern how the GM renders scenes, rolls dice, and
+runs the table, no matter which flavor pack (or generic mode) the
+player picked.
 
 Load order:
 
 1. `ttrpg-core` (this file) - common rules and tips, always on.
 2. `ttrpg-<pack>` - the player's chosen setting. Skip in generic mode.
-
-The recovery skill depends on this pack being repasted after a
-compression boundary; the operating rules below are not optional.
 
 ## Discord Output Formatting
 

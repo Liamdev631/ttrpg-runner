@@ -1,12 +1,9 @@
 name: ttrpg-runner
-version: 3.1.0
-description: Run isolated tabletop RPG sessions with persistent dossiers, setting-specific flavor packs, and a story-aware context engine that re-pastes the active session's data files after compression and uses the bundled /ttrpg-recover skill to ask the LLM to keep the data files in sync with the recent transcript.
+version: 3.2.0
+description: Run isolated tabletop RPG sessions with persistent dossiers and setting-specific flavor packs.
 author: OpenAI
 provides_tools:
   - ttrpg_roll
-provides_hooks:
-  - pre_tool_call
-  - post_tool_call
 requires_env: []
 metadata:
   hermes:

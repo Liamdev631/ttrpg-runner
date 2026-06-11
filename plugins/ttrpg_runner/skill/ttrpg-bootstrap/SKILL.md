@@ -10,13 +10,6 @@ platforms: [linux, macos, windows]
 
 Bootstrap a fresh tabletop RPG session with strict per-session memory isolation and explicit flavor-pack boundaries. This skill covers everything from "I want to start a game" through the first scene.
 
-## Companion Skills
-
-- `/ttrpg-bootstrap` (this skill): set up a new session, load the right pack, walk through character creation, open the first scene.
-- `/ttrpg-recover` (bundled separately): the GM automatically invokes this after a context-engine compression boundary. The recovery skill tells the GM to read the data files re-pasted by the engine, compare them against the recent transcript, update the files to reflect what just happened, and continue play.
-
-Both skills live in the same plugin (`ttrpg-runner`) and share the same session files; `ttrpg-recover` does not bootstrap a new session and `ttrpg-bootstrap` does not need to know about compression.
-
 ## Native Support
 
 `/ttrpg-bootstrap` should tell the player, early and plainly, that these settings are natively supported:
@@ -79,7 +72,7 @@ Use this skill when the player wants to:
 - Unless the player explicitly says `resume`, `load`, `continue`, or names an existing session, create a brand new isolated play session.
 - Never mix data from other saved sessions into the current session.
 - Hermes reads and writes the active session's files directly with its file tools. There is no controller layer.
-- The plugin's structured tools are there to avoid brittle hand-edits. Use `ttrpg_roll` for any risky or uncertain action that needs a fair, auditable number. The post-compaction state is the data files, not a tool the GM invokes; the recovery skill asks the LLM to keep the data files in sync with the recent transcript, and the engine re-pastes those files on the next compression.
+- The plugin's structured tools are there to avoid brittle hand-edits. Use `ttrpg_roll` for any risky or uncertain action that needs a fair, auditable number.
 - Keep the fiction system-inspired and genre-faithful without quoting proprietary rulebooks as if they were bundled in the repo.
 - Do not rely on bundled seed libraries of names, quests, rumors, events, or NPCs. Those were intentionally removed to prevent repeated content across sessions.
 - Do not use a database, bootstrap pipeline, or online-downloaded search index for pack knowledge.
@@ -91,7 +84,7 @@ Use this skill when the player wants to:
 
 ## Skill Layout
 
-Every skill in this plugin lives as its own first-class skill directory under `skill/`, so it can be installed, symlinked, and loaded with `skill_view` exactly the same way as a built-in Hermes skill. The session bootstrap and post-compaction skills sit alongside the flavor-pack skills; the templates folder stays under `ttrpg-bootstrap` because it is bootstrap-only scratch.
+Every skill in this plugin lives as its own first-class skill directory under `skill/`, so it can be installed, symlinked, and loaded with `skill_view` exactly the same way as a built-in Hermes skill. The flavor-pack skills sit alongside the bootstrap skill; the templates folder stays under `ttrpg-bootstrap` because it is bootstrap-only scratch.
 
 ```text
 skill/
@@ -103,8 +96,6 @@ skill/
       location.md
       secrets.md
       session-summary.md
-  ttrpg-recover/                  # /ttrpg-recover slash command
-    SKILL.md                      # post-compaction recovery instructions
   ttrpg-core/                     # /ttrpg-core - always-on common rules
     SKILL.md
   ttrpg-cyberpunk/                # /ttrpg-cyberpunk
@@ -151,7 +142,7 @@ Configured `ttrpg_runner.base_dir` (default `~/.hermes/ttrpg-runner`) is the roo
 - `events/<slug>.md` — missions, incidents, betrayals, and turning points.
 - `rolls/<stamp>-<label>.json` — optional audit trail for important dice calls.
 
-There is no separate `session.json`. The compression engine re-pastes the data files (above) into the working context on every compression, and the recovery skill asks the LLM to keep them in sync with the recent transcript. Adding a `session.json` mirror would duplicate that state and risk drift, so the plugin does not maintain one.
+There is no separate `session.json`. The data files (above) are the canonical state; adding a `session.json` mirror would duplicate that state and risk drift, so the plugin does not maintain one.
 
 ## Session Metadata
 
@@ -197,7 +188,7 @@ The first thing inside `story.md` is a small block that records the session's id
    For each active pack, read only that pack's docs.
    Start with `skill_view("ttrpg-<pack>")` for every active pack — that returns the base `SKILL.md`. Open deeper markdown files from the same pack with `skill_view("ttrpg-<pack>", "resources/<file>.md")` only when the current turn actually needs them.
    For `mistborn`, the base `SKILL.md` is the always-on ruleset (dice, magic, character sheet, conflicts, damage, missions, and pack-wide events). The `resources/era_1.md` or `resources/era_2.md` file adds era-specific setting, factions, missions, and events. Read era files only when the active session's `mistborn_era` calls for them.
-   **The core pack is always on.** Before the first scene of any session (native, native crossover, or generic mode), load `ttrpg-core` with `skill_view("ttrpg-core")`. It holds the setting-agnostic operating rules the GM needs every turn: Discord output formatting, the whitespace discipline rule, multiplayer turn management, dice-and-roll interleaving, and the roll display format. The `post_tool_call` hook tags that skill as an active pack the moment it is read, so the context engine repastes it after every compression boundary. Treat the core pack as required reading, not optional context, and keep its rules in scope for the rest of the run.
+   **The core pack is always on.** Before the first scene of any session (native, native crossover, or generic mode), load `ttrpg-core` with `skill_view("ttrpg-core")`. It holds the setting-agnostic operating rules the GM needs every turn: Discord output formatting, the whitespace discipline rule, multiplayer turn management, dice-and-roll interleaving, and the roll display format. Treat the core pack as required reading, not optional context, and keep its rules in scope for the rest of the run.
    Load order is core first, then the chosen setting pack. The `ttrpg-core` skill is the only source of truth for the always-on common rules.
 
 5. Create or resume a session by hand.
@@ -226,7 +217,6 @@ The first thing inside `story.md` is a small block that records the session's id
    - If a markdown reference file includes external material, keep the citations block at the top intact when you update it.
    - Format every player-facing message with Discord-native markdown per the core pack. Dice cards go in fenced code blocks, NPC speech in block quotes, and scene openings under `###` headings.
    - Write the resulting state changes back into the active session files. When a beat changes the campaign state, update the data file (or dossier) that owns that fact - do not invent a parallel JSON mirror.
-   - Watch for a "Session Data Update Required" bridge message from the context engine. When it appears, switch to the `ttrpg-recover` skill for the rest of the turn: read the recent transcript the engine kept verbatim, compare it against the data files re-pasted by the engine, update the files to reflect what just happened, and continue play.
 
 9. Close each turn with a game-facing handoff.
    Summarize what changed, what the player can do next, and what pressures or leads are now in motion.
@@ -263,11 +253,9 @@ What belongs in `secrets.md` includes: hidden NPC agendas, true identities, secr
 ## Reference
 
 - `ttrpg_roll` plugin tool - fair dice rolling via Python's uniform `randint`.
-- `load_ttrpg_context_files(session_id)` plugin tool (used by `ttrpg-recover`) - returns the list of asset packs the active session has loaded, so the post-compaction GM can decide which to reload. **The list is generated automatically**: the `post_tool_call` hook watches every file the GM reads and registers any active pack (`SKILL.md` under one of the plugin's `ttrpg-<pack>/` skill directories) the moment it enters scope. The skill never has to call this list-builder by hand; the hook does it for free. This tool is only for *reading* the list, not for adding to it.
-- `ttrpg-core` - the always-on common-rules skill (Discord formatting, whitespace discipline, multiplayer turn management, dice-and-roll interleaving, roll display format). Load it once at the start of every session with `skill_view("ttrpg-core")`, before the first scene, and keep its rules in scope for the rest of the run. The `post_tool_call` hook tags it as an active pack so the context engine repastes it after every compression boundary.
+- `ttrpg-core` - the always-on common-rules skill (Discord formatting, whitespace discipline, multiplayer turn management, dice-and-roll interleaving, roll display format). Load it once at the start of every session with `skill_view("ttrpg-core")`, before the first scene, and keep its rules in scope for the rest of the run.
 - `templates/character.md` - canonical markdown sheet for PCs, companions, and NPCs. Use this instead of any JSON shape.
 - `templates/secrets.md` - GM-only secrets ledger; never printed in chat.
-- The companion skill `ttrpg-recover` is loaded automatically after a context-engine compression; switch into it the moment a "Session Data Update Required" bridge message appears in the working context.
 
 ## Pitfalls
 
@@ -282,7 +270,6 @@ What belongs in `secrets.md` includes: hidden NPC agendas, true identities, secr
 - Do not let one player's request, inventory, XP, or consequence land on another player's character in multiplayer play.
 - Do not print the contents of `secrets.md` (or any paraphrase, hint, or spoiler-tagged copy of it) into player-facing chat. The instant a secret is rendered to a player it stops being a secret.
 - Do not store character stats, skills, derived values, inventory, or XP in JSON. Character sheets are markdown; the data files hold the campaign state. There is no `session.json` to duplicate into.
-- Do not invoke `ttrpg-recover` outside of a real compression boundary. The recovery skill is for post-compaction work, not for normal play.
 - Do not skip the core pack or load it "only when needed." `ttrpg-core` is required reading for every session; load it with `skill_view("ttrpg-core")` at the start of every session and keep its guidance in scope, just like the setting pack.
 - Do not answer a Mistborn era question and then move on. The era answer is the trigger: in the same turn, run `skill_view("ttrpg-mistborn")` and `skill_view("ttrpg-mistborn", "resources/era_1.md")` (or `resources/era_2.md`) before doing anything else. Asking the era question without loading the era file leaves the base pack half-loaded.
 
@@ -301,4 +288,3 @@ The skill is working correctly when all of the following are true:
 - No scene content was produced by mixing another flavor pack or another saved session into the current one.
 - Player-facing output uses Discord-native markdown: `###` scene headers, `**bold**` anchors, `>` block quotes for NPC speech, fenced code blocks for dice cards, and `-#` for ambient tags.
 - `ttrpg-core` was loaded with `skill_view("ttrpg-core")` at the start of the session and remains in scope, including the whitespace discipline rule.
-- Every markdown file the agent brought into context during the run was registered automatically by the `post_tool_call` hook, so `load_ttrpg_context_files(session_id)` can return the full list of asset packs the session used (with the core pack always present).
