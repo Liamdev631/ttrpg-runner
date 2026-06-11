@@ -23,8 +23,9 @@ The plugin lives at `plugins/ttrpg_runner/`:
 - **`context_engine.py`** — `TTRPGContextEngine`, a `ContextEngine`
   subclass that re-pastes session data files after compression.
 - **`skill/ttrpg-bootstrap/`** — bootstrap skill, plus
-  `references/` (always-on), `templates/`, and `flavorpacks/`
-  (`cyberpunk`, `dnd`, `pokemon`, `expanse`, `mistborn`).
+   `templates/`, and `flavorpacks/`
+  (`core` always-on, plus the five native settings
+  `cyberpunk`, `dnd`, `pokemon`, `expanse`, `mistborn`).
 - **`skill/ttrpg-recover/`** — the post-compaction recovery
   skill.
 
@@ -54,12 +55,14 @@ compression.
 **`/ttrpg-bootstrap`** — session setup and runtime manual. The
 GM picks a setting (one of the five native packs, a native
 crossover, or reduced-feature generic mode), writes the Session
-Metadata header in `story.md`, reads the always-on `discord-formatting.md`
-reference, and reads the active pack's `PACK.md` (and the matching
-`mistborn/resources/mistborn_era_{1,2}.md` for mistborn). Each
-turn: skim `story.md` and `timeline.md`, use `ttrpg_roll` for
-risky actions, format Discord-native output, write state changes
-back to the data files.
+Metadata header in `story.md`, reads the always-on
+`flavorpacks/core/PACK.md` asset pack (Discord formatting,
+whitespace discipline, multiplayer turn management, dice-and-roll
+interleaving, roll display format), and reads the active pack's
+`PACK.md` (and the matching `mistborn/resources/mistborn_era_{1,2}.md`
+for mistborn). Each turn: skim `story.md` and `timeline.md`, use
+`ttrpg_roll` for risky actions, format Discord-native output, write
+state changes back to the data files.
 
 **`/ttrpg-recover`** — the post-compaction fix-up. Runs once
 after the engine emits a `## Session Data Update Required` bridge
@@ -120,10 +123,11 @@ the full campaign state to work with after compression.
 
 **Bootstrap.** Player runs `/ttrpg-bootstrap`. Skill asks for
 solo/multiplayer, then the setting (and Era 1 or 2 for mistborn).
-Creates the session folder, seeds the data files, writes the
-Session Metadata block in `story.md`. Reads `discord-formatting.md`
+reates the session folder, seeds the data files, writes the
+Session Metadata block in `story.md`. Reads
+`flavorpacks/core/PACK.md` (the always-on common-rules asset pack)
 and the active pack `PACK.md` (and mistborn era file). The
-`post_tool_call` hook registers the pack on the engine. Player
+`post_tool_call` hook registers both packs on the engine. Player
 runs through character creation and authorizes play. Skill opens
 the first scene.
 

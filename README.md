@@ -71,7 +71,6 @@ run in a reduced-feature mode with no native pack references.
 - Load `flavorpacks/mistborn/PACK.md`.
 - Ask the table for `Era 1` or `Era 2` and record it in the Session Metadata block at the top of `story.md`.
 - Use the matching era section inside the same `PACK.md` instead of loading a separate subpack file.
-- The legacy `mistborn/era1/` and `mistborn/era2/` directories remain as archival notes, not the normal runtime pack surface.
 
 ## What It Includes
 
@@ -79,8 +78,10 @@ run in a reduced-feature mode with no native pack references.
   dice usage, and flavor-pack loading rules
 - A companion `ttrpg-recover` skill that runs the post-compaction
   recovery pass
-- A Discord-native markdown reference so player-facing output reads
-  cleanly in chat
+- An always-on `core` asset pack that carries the Discord-native
+  markdown rules, whitespace discipline, multiplayer turn management,
+  dice-and-roll interleaving, and roll display format the GM follows
+  on every turn
 - One plugin tool: `ttrpg_roll`
 - Markdown templates for dossiers, secrets, and running session state
 - Five native flavor packs under
@@ -112,8 +113,6 @@ plugins/
     skill/
       ttrpg-bootstrap/
         SKILL.md                  # /ttrpg-bootstrap - session bootstrap
-        references/
-          discord-formatting.md
         templates/
           character.md
           event.md
@@ -121,24 +120,33 @@ plugins/
           secrets.md
           session-summary.md
         flavorpacks/
+          core/PACK.md  # always-on common rules and tips (Discord, dice, turn mgmt)
           cyberpunk/PACK.md
           dnd/PACK.md
           pokemon/PACK.md
           expanse/PACK.md
           mistborn/
-            PACK.md               # canonical Mistborn pack with Era 1 / Era 2 sections
-            era1/PACK.md          # archival legacy subpack note
-            era2/PACK.md          # archival legacy subpack note
-            references/           # imported upstream source tree
+            PACK.md # canonical Mistborn pack with Era 1 / Era 2 sections
+            references/ # imported upstream source tree
               source-manifest.md
               Base Game/...
               Nobles - The Golden Mandate/...
               Skaa - Tin & Ash/...
               Terris - Wrought of Copper/...
       ttrpg-recover/
-        SKILL.md                  # /ttrpg-recover - post-compaction recovery
+        SKILL.md # /ttrpg-recover - post-compaction recovery
 README.md
 ```
+
+The `core` flavor pack is the always-on asset pack: it carries the
+setting-agnostic operating rules the GM follows every turn (Discord
+output formatting, whitespace discipline, multiplayer turn management,
+dice-and-roll interleaving, roll display format). The bootstrap skill
+loads it before the first scene of any session, and the
+`post_tool_call` hook registers it on the context engine so it gets
+repasted into the working context after every compression boundary —
+which is exactly what the `ttrpg-recover` skill needs to do its job
+without re-reading the rule list from disk.
 
 The directory is named `ttrpg_runner` (underscore) so multi-file Python
 imports work, but the manifest's `name:` field is `ttrpg-runner` (hyphen)
@@ -282,8 +290,9 @@ or pick it in `hermes plugins` -> Provider Plugins -> Context Engine.
 
 - All player-facing output uses Discord-native markdown so messages render
   cleanly in chat
-- `references/discord-formatting.md` (inside the bootstrap skill) is the
-  canonical formatting reference for the agent
+- `flavorpacks/core/PACK.md` (the always-on common-rules asset pack
+  inside the bootstrap skill) is the canonical formatting reference for
+  the agent, including the whitespace discipline rule
 - Dice cards live in fenced code blocks, NPC speech in `>` block quotes,
   scene headers in `###` headings, ambient tags in `-#` subtext
 - Each flavor pack `PACK.md` has a "Discord Rendering" section with

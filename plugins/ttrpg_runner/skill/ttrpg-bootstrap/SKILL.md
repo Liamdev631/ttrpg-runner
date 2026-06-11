@@ -50,7 +50,7 @@ If the requested game is outside that list, say that any TTRPG is still possible
 - Load `flavorpacks/mistborn/PACK.md` as the always-on ruleset.
 - Load the matching era file: `flavorpacks/mistborn/resources/mistborn_era_1.md` or `flavorpacks/mistborn/resources/mistborn_era_2.md`.
 - Record the answer in the `story.md` header block (see "Session Metadata" below) so a resumed session remembers it.
-- Read exactly one era file per Mistborn session, paired with the base `PACK.md`. The old `mistborn/era1/` and `mistborn/era2/` subfolders (and the per-era `references/` trees) no longer exist; era content lives in `mistborn/resources/` alongside the base pack.
+- Read exactly one era file per Mistborn session, paired with the base `PACK.md`. Era content lives in `mistborn/resources/` alongside the base pack.
 
 ## Flavor Pack Loading Rules
 
@@ -100,8 +100,6 @@ This skill lives inside the plugin's own `skill/ttrpg-bootstrap/` folder so it t
 skill/
   ttrpg-bootstrap/
     SKILL.md                       # this file
-    references/
-      discord-formatting.md
     templates/
       character.md
       event.md
@@ -109,6 +107,8 @@ skill/
       secrets.md
       session-summary.md
     flavorpacks/
+      core/                        # always-on common rules and tips
+        PACK.md                    # loaded for every session, any setting
       cyberpunk/
         PACK.md                    # base pack, no subpacks
       dnd/
@@ -201,10 +201,8 @@ The first thing inside `story.md` is a small block that records the session's id
    For each active pack, read only that pack's docs.
    Start with `flavorpacks/<pack>/PACK.md` for every active pack. Open deeper markdown files from the same pack only when the current turn actually needs them.
    For `mistborn`, the main `mistborn/PACK.md` is the always-on ruleset (dice, magic, character sheet, conflicts, damage, missions, and pack-wide events). The `mistborn/resources/mistborn_era_1.md` or `mistborn/resources/mistborn_era_2.md` file adds era-specific setting, factions, missions, and events. Read era files only when the active session's `mistborn_era` calls for them.
-   Two bootstrap-owned references are always on. Read them once at the start of every session, before the first scene, and keep their guidance in scope for the rest of the run:
-   - `references/discord-formatting.md` - the Discord-native markdown rules used for every player-facing message. Load this once per session so scene headers, block quotes, code blocks, and ambient tags render correctly.
-   `references/session-data-model.md` is the legacy name for the same kind of guide; if it is present, treat it as a deprecation stub and follow the in-skill guidance above instead.
-   If either file is missing, fall back to the same rules inlined in this skill and continue, but treat the in-scope references as the source of truth when present.
+   **The core pack is always on.** Before the first scene of any session (native, native crossover, or generic mode), read `flavorpacks/core/PACK.md`. It holds the setting-agnostic operating rules the GM needs every turn: Discord output formatting, the whitespace discipline rule, multiplayer turn management, dice-and-roll interleaving, and the roll display format. The `post_tool_call` hook tags that file as a required asset pack the moment it is read, so the context engine repastes it after every compression boundary. Treat the core pack as required reading, not optional context, and keep its rules in scope for the rest of the run.
+   Load order is core first, then the chosen setting pack. The `flavorpacks/core/PACK.md` file is the only source of truth for the always-on common rules.
 
 5. Create or resume a session by hand.
    Hermes manages the session directory directly with its file tools.
@@ -230,7 +228,7 @@ The first thing inside `story.md` is a small block that records the session's id
    - Use `ttrpg_roll` for risky or uncertain actions.
    - For native packs only, consult the active pack's markdown references when you need tone, gameplay cadence, or a curated fact reminder.
    - If a markdown reference file includes external material, keep the citations block at the top intact when you update it.
-   - Format every player-facing message with Discord-native markdown per `references/discord-formatting.md`. Dice cards go in fenced code blocks, NPC speech in block quotes, and scene openings under `###` headings.
+   - Format every player-facing message with Discord-native markdown per the core pack. Dice cards go in fenced code blocks, NPC speech in block quotes, and scene openings under `###` headings.
    - Write the resulting state changes back into the active session files. When a beat changes the campaign state, update the data file (or dossier) that owns that fact - do not invent a parallel JSON mirror.
    - Watch for a "Session Data Update Required" bridge message from the context engine. When it appears, switch to the `ttrpg-recover` skill for the rest of the turn: read the recent transcript the engine kept verbatim, compare it against the data files re-pasted by the engine, update the files to reflect what just happened, and continue play.
 
@@ -266,126 +264,11 @@ Every active session ships with a `secrets.md` file seeded from `templates/secre
 
 What belongs in `secrets.md` includes: hidden NPC agendas, true identities, secret faction goals, planted evidence, ticking bombs the players cannot see, GM-triggered twists, the real reason a scene is the way it is, and any fact that would change player behavior the moment it surfaced.
 
-## Multiplayer Turn Management
-
-Turn order belongs to the GM. The goal is a fair rotation that lets every player drive equal amounts of the story, and that stops one player from hijacking the table.
-
-- The GM picks the active player for each turn using their own judgment, not whoever spoke first. Choose whoever has the most natural stake in the current beat, then rotate so every player gets roughly equal spotlight over time.
-- End every message with an explicit handoff that names the next active player. Render it as a `> **Up next: <player name>**` block quote so it is unmissable in Discord.
-- If one player keeps taking multiple turns in a row, rotate to someone else and name the rotation in the handoff. Spotlight hoarding is a campaign-killer, not a clever play; do not let a runaway player destroy the session for the rest of the table.
-- If a player brings a deliberately broken or joke build, let them play it. The job is to temper the outcome, not to ban the concept. A broken trick should reward the active player, not let one PC decide the whole party's fate, and it must never force consequences onto another player's character without that player's consent.
-- If a non-active player speaks up for the active player or tries to drive the scene on their behalf, acknowledge their intent, refuse to let them steer, and politely ask them to step back and let their teammate act. Keep the tone in the GM voice. Do not lecture, do not moralize; just hold the turn line and move on.
-- If the same player keeps overstepping across multiple turns, name the pattern once in a friendly GM-voice aside, then keep enforcing turn order. Do not escalate into a confrontation; the rule does not get louder, it just stays in effect.
-- "Identify the active speaker in multiplayer sessions before applying any request" in the Procedure section is shorthand for this whole section. When in doubt, re-read these rules.
-
-## Discord Output Formatting
-
-All player-facing output is rendered into Discord. Every message should use Discord-native markdown so it reads clean in chat.
-
-- The full Discord formatting reference lives at `references/discord-formatting.md`. Read it before composing the first message of a session.
-- Open every scene response with a `###` heading that names the beat.
-- Use `-#` for ambient context (time, place, weather) the player can skim.
-- Bold the most important noun or verb in each paragraph of fiction.
-- Use `>` block quotes for NPC speech and the GM voice.
-- Use fenced code blocks for dice cards, stat blocks, and any JSON state.
-- Use `||...||` spoilers for plot twists, hidden NPC intentions, and GM-only notes that leak into a shared channel.
-- Do not use Discord tables. Use bullet lists or code blocks instead.
-- Keep each message scannable in under five seconds. Split anything longer than ten short paragraphs across multiple messages.
-- Do not paste prose inside code blocks expecting it to be formatted. Code blocks cancel every other markdown rule.
-
-### Discord-Specific Gotchas To Avoid
-
-- `__text__` is **underline**, not bold. Always use `**text**` for bold.
-- Headings, subtext, and list markers must be the first non-whitespace character on a line, followed by a single space.
-- Spoiler tags and inline code cancel every other formatting inside them.
-- Do not try to embed a list inside a code block or a code block inside a list item. Compose the dice card and the fiction in separate messages when both are needed.
-
-## Dice And Roll Interleaving
-
-The dice tool is the numerical authority in play.
-
-- When in doubt, roll.
-- Narrate a short setup beat, call `ttrpg_roll`, then continue the scene after reading the tool output.
-- Never pre-write a risky action's outcome and then roll to justify it.
-- Always cite the stat and skill being rolled so the player can audit the call.
-- Pure description and zero-stakes color do not need a roll.
-- Use `ttrpg_roll` for any dice expression, e.g. `2d6+3`, `1d20+5`, `4d8-2`.
-- For a fast check, call `ttrpg_roll` with `1d10+<stat>+<skill>+<modifier>` and apply the outcome tier yourself (strong success on +5 over DC, success on DC+, hard failure on DC-5, failure otherwise). The display formats below show how to render the math.
-- For an opposed contest, call `ttrpg_roll` twice (once for the attacker, once for the defender, each as `1d10+<bonus>`) and compare the two totals.
-
-## Roll Display Format
-
-Each roll shown to the player should be rendered as a single fenced code block using a consistent box shape. ASCII is preferred for portability.
-
-When the roll is the centerpiece of a beat, wrap the code block in Discord-native chrome so the player can read the math, the meaning, and the consequences in one screen.
-
-`red-check`:
-
-````text
-**REF / Stealth vs DC 12**
-
-```
-=======================================
-  CHECK * <STAT>/<Skill> <rank> vs DC <difficulty>
----------------------------------------
-  Difficulty : <difficulty>
-  d10        : <die>
-  Stat       : <stat>
-  Skill      : <skill>
-  Modifier   : <+|-><modifier>
----------------------------------------
-  TOTAL      : <total>
-  OUTCOME    : <STRONG SUCCESS | SUCCESS | FAILURE | HARD FAILURE>
-=======================================
-```
-
-> <one-sentence narrative consequence, in the GM voice>
-````
-
-`opposed`:
-
-````text
-**Melee Clash: BOD/Fight 4 vs BOD/Fight 3**
-
-```
-=======================================
-  OPPOSED * <A_STAT>/<A_Skill> vs <D_STAT>/<D_Skill>
----------------------------------------
-  ATTACKER  : <die + bonus = total>
-  DEFENDER  : <die + bonus = total>
----------------------------------------
-  WINNER    : <ATTACKER | DEFENDER | TIE>
-=======================================
-```
-
-> <one-sentence narrative consequence, in the GM voice>
-````
-
-`roll`:
-
-````text
-**Wild Die: 2d6+1**
-
-```
-=======================================
-  ROLL * <expression>
----------------------------------------
-  Dice      : [<d1>, <d2>, ...]
-  Modifier  : <+|-><modifier>
-  TOTAL     : <total>
-=======================================
-```
-````
-
-The bold heading is the label, the fenced code block is the auditable math, and the block quote is the consequence. This three-line shape is the default for any roll that matters in play.
-
-For low-stakes or off-screen rolls, the code block alone is fine.
-
 ## Reference
 
 - `ttrpg_roll` plugin tool - fair dice rolling via Python's uniform `randint`.
 - `load_ttrpg_context_files(session_id)` plugin tool (used by `ttrpg-recover`) - returns the list of asset packs the active session has loaded, so the post-compaction GM can decide which to reload. **The list is generated automatically**: the `post_tool_call` hook watches every file the GM reads and registers any asset pack (`PACK.md` under `skill/ttrpg-bootstrap/flavorpacks/`) the moment it enters scope. The skill never has to call this list-builder by hand; the hook does it for free. This tool is only for *reading* the list, not for adding to it.
-- `references/discord-formatting.md` - Discord-native markdown reference for player-facing output. Always loaded at the start of a session; do not skip it.
+- `flavorpacks/core/PACK.md` - the always-on common-rules asset pack (Discord formatting, whitespace discipline, multiplayer turn management, dice-and-roll interleaving, roll display format). Read it once at the start of every session, before the first scene, and keep its rules in scope for the rest of the run. The `post_tool_call` hook tags it as an active pack so the context engine repastes it after every compression boundary.
 - `templates/character.md` - canonical markdown sheet for PCs, companions, and NPCs. Use this instead of any JSON shape.
 - `templates/secrets.md` - GM-only secrets ledger; never printed in chat.
 - The companion skill `ttrpg-recover` is loaded automatically after a context-engine compression; switch into it the moment a "Session Data Update Required" bridge message appears in the working context.
@@ -404,7 +287,7 @@ For low-stakes or off-screen rolls, the code block alone is fine.
 - Do not print the contents of `secrets.md` (or any paraphrase, hint, or spoiler-tagged copy of it) into player-facing chat. The instant a secret is rendered to a player it stops being a secret.
 - Do not store character stats, skills, derived values, inventory, or XP in JSON. Character sheets are markdown; the data files hold the campaign state. There is no `session.json` to duplicate into.
 - Do not invoke `ttrpg-recover` outside of a real compression boundary. The recovery skill is for post-compaction work, not for normal play.
-- Do not load `references/session-data-model.md` (legacy stub) or `references/discord-formatting.md` only "when needed." Both are always on for sessions that have them; load them at the start of every session and keep their guidance in scope.
+- Do not skip the core pack or load it "only when needed." `flavorpacks/core/PACK.md` is required reading for every session; load it at the start of every session and keep its guidance in scope, just like the setting pack.
 
 ## Verification
 
@@ -420,5 +303,5 @@ The skill is working correctly when all of the following are true:
 - The current scene's new facts are written back into the active session's files using Hermes file tools.
 - No scene content was produced by mixing another flavor pack or another saved session into the current one.
 - Player-facing output uses Discord-native markdown: `###` scene headers, `**bold**` anchors, `>` block quotes for NPC speech, fenced code blocks for dice cards, and `-#` for ambient tags.
-- `references/discord-formatting.md` was loaded at the start of the session and remains in scope.
-- Every markdown file the agent brought into context during the run was registered automatically by the `post_tool_call` hook, so `load_ttrpg_context_files(session_id)` can return the full list of asset packs the session used.
+- `flavorpacks/core/PACK.md` was loaded at the start of the session and remains in scope, including the whitespace discipline rule.
+- Every markdown file the agent brought into context during the run was registered automatically by the `post_tool_call` hook, so `load_ttrpg_context_files(session_id)` can return the full list of asset packs the session used (with the core pack always present).

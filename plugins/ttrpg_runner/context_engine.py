@@ -43,34 +43,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-try:
-    # Hermes ships the ABC at agent.context_engine. Importing it at
-    # module load lets us subclass cleanly when the host is present.
-    from agent.context_engine import ContextEngine  # type: ignore
-except Exception:  # pragma: no cover - host not available at author time
-    class ContextEngine:  # type: ignore[no-redef]
-        """Minimal stub mirroring the agent ABC for type-check / dev use."""
-
-        last_prompt_tokens: int = 0
-        last_completion_tokens: int = 0
-        last_total_tokens: int = 0
-        threshold_tokens: int = 0
-        context_length: int = 0
-        compression_count: int = 0
-
-        def update_from_response(self, usage: dict) -> None:
-            ...
-
-        def should_compress(self, prompt_tokens: int | None = None) -> bool:
-            ...
-
-        def compress(
-            self,
-            messages: list,
-            current_tokens: int | None = None,
-            focus_topic: str | None = None,
-        ) -> list:
-            ...
+from agent.context_engine import ContextEngine  # type: ignore
 
 
 # Heuristic token estimate when the API does not report usage.
