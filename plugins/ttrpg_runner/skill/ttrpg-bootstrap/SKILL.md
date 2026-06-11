@@ -100,6 +100,8 @@ skill/
     SKILL.md
   ttrpg-clean/                    # /ttrpg-clean - compact and dedupe session files
     SKILL.md
+  ttrpg-refresh/                  # /ttrpg-refresh - recover from a Hermes context compression
+    SKILL.md
   ttrpg-cyberpunk/                # /ttrpg-cyberpunk
     SKILL.md                      # base pack, no subpacks
   ttrpg-dnd/                      # /ttrpg-dnd
@@ -155,6 +157,25 @@ The data files in a session folder are **append-only**. This is a deliberate per
 - **If you catch yourself editing in place, stop.** Use the append path. If the append path cannot express the change, run `/ttrpg-clean` and let the compactor rewrite the file.
 
 This rule is load-bearing. If a turn would otherwise require editing a session file in place, change the beat so it does not, or queue the change for the next `/ttrpg-clean`.
+
+## Compression Recovery
+
+Hermes periodically compresses the conversation to keep the working context inside the model's window. When that happens, the agent's in-context memory of the campaign shrinks to a structured summary and the rest of the table's history is gone from the LLM's head. The campaign survives because its truth lives on disk in the session folder; the agent survives by calling `/ttrpg-refresh` and re-loading itself.
+
+This is not a manual cleanup the player has to remember. The agent watches for compression markers on its own and invokes `/ttrpg-refresh` the moment it notices one. Treat that prompt as part of the per-turn discipline, on the same level as the append-only write rule and the load-order rule.
+
+The compression markers the agent watches for are defined precisely in `ttrpg-refresh`; the short list is:
+
+- **First-compaction system-prompt note:** a literal substring the agent can grep for — `[Note: Some earlier conversation turns have been compacted...]` — appended to the system prompt on the first compression of a session.
+- **Standalone assistant summary message:** an assistant turn whose first line starts with `[CONTEXT COMPACTION] Earlier turns were compacted...`. That is the in-context summary of everything Hermes compressed.
+- **Pruned tool results:** a tool result (or series of tool results) whose body is the literal string `[Old tool output cleared to save context space]`. The original output is gone from context; the agent must re-open the file or re-run the tool if the fact matters.
+- **Context-pressure warning:** a system message that begins with `⚠️ Context is 85% to compaction threshold`. Compression is imminent or has just happened; treat the next turn as a post-compression turn.
+- **Improbable recall gaps:** the agent catches itself about to repeat a question the table already answered, introduce a beat the timeline says already happened, or invent a placeholder for a fact the table clearly treats as established. Soft signal, but a reliable one.
+- **First turn of a resumed session:** the session metadata says `Last Resumed` is recent and the agent has no in-context memory of prior turns. Resume is an implicit compression marker; the agent runs the same recovery loop.
+
+When the agent sees any of those, the first action of the turn is `skill_view("ttrpg-refresh")`, followed by the six-step recovery procedure in that skill (identify the active session, re-load the canonical data files, re-load `ttrpg-core` and the active setting pack, cross-check the in-context summary against the disk, re-anchor the active speaker, resume with a single short opening line). The recovery is internal; the table does not see a "previously on..." monologue, and the agent does not paste `secrets.md` into chat as part of re-anchoring.
+
+The full marker grammar, the full recovery procedure, and the hard rules refresh must respect (do not narrate the recovery, do not rewrite session files, do not trust the in-context summary over the disk) live in `ttrpg-refresh`. This section is the rule that says the agent calls it.
 
 ## Session Metadata
 
@@ -222,6 +243,13 @@ The first thing inside `story.md` is a small block that records the session's id
 8. Run the game by editing the active session's files.
    On every turn:
 
+   - First, check for compression. Scan the system prompt, the
+     last few assistant turns, and the recent tool results for
+     the compression markers listed in "Compression Recovery"
+     above. If any marker is present, the first action of the
+     turn is `skill_view("ttrpg-refresh")` and the six-step
+     recovery procedure; then continue with the rest of this
+     list. If no marker is present, proceed.
    - Skim `story.md` (the metadata header plus the current scene) and `timeline.md` first.
    - Identify the active speaker in multiplayer sessions before applying any request.
    - Use `ttrpg_roll` for risky or uncertain actions.
@@ -267,6 +295,7 @@ What belongs in `secrets.md` includes: hidden NPC agendas, true identities, secr
 - `ttrpg_roll` plugin tool - fair dice rolling via Python's uniform `randint`.
 - `ttrpg-core` - the always-on common-rules skill (Discord formatting, whitespace discipline, multiplayer turn management, dice-and-roll interleaving, roll display format). Load it once at the start of every session with `skill_view("ttrpg-core")`, before the first scene, and keep its rules in scope for the rest of the run.
 - `ttrpg-clean` - the compactor skill. The only sanctioned read-modify-write path for session data. Run `/ttrpg-clean` when a session file is getting long and the LLM will open that file, merge redundant entries, drop resolved and stale items, and rewrite it under 100 lines. See "Append-Only Session Files" above for why this exists.
+- `ttrpg-refresh` - the recovery skill. The agent calls this on its own initiative every time it sees a Hermes context-compression marker, a context-pressure warning, an obviously missing scene, a pruned tool result, or a first turn of a resumed session. See "Compression Recovery" above for the rule and the markers; the full recovery procedure lives in the skill.
 - `templates/character.md` - canonical markdown sheet for PCs, companions, and NPCs. Use this instead of any JSON shape.
 - `templates/secrets.md` - GM-only file; holds `Active Secrets`, `Burned Secrets`, and `GM Planning Notes`. Never printed in chat.
 
@@ -286,6 +315,7 @@ What belongs in `secrets.md` includes: hidden NPC agendas, true identities, secr
 - Do not skip the core pack or load it "only when needed." `ttrpg-core` is required reading for every session; load it with `skill_view("ttrpg-core")` at the start of every session and keep its guidance in scope, just like the setting pack.
 - Do not answer a Mistborn era question and then move on. The era answer is the trigger: in the same turn, run `skill_view("ttrpg-mistborn")` and `skill_view("ttrpg-mistborn", "resources/era_1.md")` (or `resources/era_2.md`) before doing anything else. Asking the era question without loading the era file leaves the base pack half-loaded.
 - Do not edit a session file in place to rewrite history. Session files are append-only. The only sanctioned read-modify-write path is `/ttrpg-clean`. If a turn feels like it needs a hand-edit, change the beat or queue it for the next clean.
+- Do not ignore a compression marker. If the system prompt, a recent assistant turn, or a recent tool result shows one of the markers listed in "Compression Recovery" above, the next turn must start with `/ttrpg-refresh`. Skipping recovery and continuing to play from the in-context summary is how the agent invents canon and the table loses a session.
 
 ## Verification
 
@@ -303,3 +333,4 @@ The skill is working correctly when all of the following are true:
 - Player-facing output uses Discord-native markdown: `###` scene headers, `**bold**` anchors, `>` block quotes for NPC speech, fenced code blocks for dice cards, and `-#` for ambient tags.
 - `ttrpg-core` was loaded with `skill_view("ttrpg-core")` at the start of the session and remains in scope, including the whitespace discipline rule.
 - In-flight turns append to session files instead of editing them in place; when a file grows past a comfortable size, `/ttrpg-clean` is invoked rather than a hand-edit.
+- At the start of every turn the agent scans for compression markers; when one is present, `/ttrpg-refresh` runs the six-step recovery procedure before the agent narrates the next beat.
