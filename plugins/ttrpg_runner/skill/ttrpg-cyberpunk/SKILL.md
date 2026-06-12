@@ -45,19 +45,7 @@ Anchor the game in these. They keep the fiction dangerous and the player investe
 
 ## Stat Guidance
 
-- `BOD` - force, endurance, intimidation
-- `REF` - shooting, driving, dodging, precision
-- `TEK` - hacking, repair, code surgery
-- `INT` - planning, medicine, research
-- `COO` - stealth, nerve, composure
-- `CHA` - persuasion, seduction, performance
-
-Suggested derived trackers:
-
-- `HP = BOD + 4`
-- `Defense = REF`
-- `Stress = COO`
-- `Reputation` starts at `0`
+Character definitions (stats, derived trackers, street-level sheet anchors) and the HEAT meter live in [`resources/game_definitions.md`](./resources/game_definitions.md). That file is a supplementary pack: it pairs with this `SKILL.md`, or can be loaded on its own when a non-Cyberpunk session wants to import Cyberpunk's character sheet and HEAT-based combat.
 
 ## Gameplay Loop
 
@@ -83,31 +71,7 @@ Suggested derived trackers:
 
 ## HEAT METER
 
-A single escalating score for police, corp security, and algorithmic attention on the crew's current block or district. Every illegal or conspicuous action adds heat. When a threshold is crossed, the city hits back on a timer.
-
-### Gaining heat
-
-- Civilian reports a crime: `+1`
-- Crime in an area not yet abandoned to urban chaos: `+2`
-- Firearms involved: `+2`
-- Automatic or military-grade weapons: `+10`
-- Large-scale arson or explosives: `+5`
-- Target is a corporate citizen: `+5`
-- More than two suspects: `+2`
-- Suspects have obvious cyberware: `+2`
-- Face on the news holding heavy hardware: `+30`
-
-Heat is local. The same job in a quiet residential block costs more heat than the same job in an industrial ruin. Hackers can spend a turn manipulating the meter — pump a rival crew's score before a job, scrub a trace after — which is also why gangs pay good money for gifted netrunners.
-
-### Response levels
-
-- `5` — Two-/three-man patrol, pistols and flak vests, `1d6×10` minutes.
-- `10` — Patrol grows by one; automatics issued.
-- `15` — `2d6` patrols plus one aerial unit, automatic weapons.
-- `20` — Urban Combat Unit: three 5-man teams, combat plate, autos, CS grenades, remote corporate hacker, `1d6` aerial support.
-- `25+` — YOU WOKE THE HIVE. Bridges blocked, transport closed, `1d6` UCU elements deployed.
-
-Cops are a malevolent omnipresent threat meter, not a wall. Use them to break rests, force scene changes, and drain resources. The crew should never get comfortable at high heat.
+The HEAT meter, its gain rules, and its response-level ladder live in [`resources/game_definitions.md`](./resources/game_definitions.md). Load that file whenever a job, a chase, or a firefight is on the table. The file pairs with this `SKILL.md` and is the same supplementary pack the Stat Guidance section above points at.
 
 ## Discord Rendering
 

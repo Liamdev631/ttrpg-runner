@@ -167,14 +167,29 @@ some steps depend on earlier steps' outputs.
       dice display format all live here.
    b. The active setting pack — for a single-pack session,
       `skill_view("ttrpg-<pack>")`; for a native crossover,
-      `skill_view` for both packs. Mistborn sessions also need
+      `skill_view` for both packs. Every active pack also
+      needs its supplementary `game_definitions.md`
+      re-loaded: `skill_view("ttrpg-<pack>", "resources/game_definitions.md")`
+      brings the character sheet, derived trackers, and
+      pack-specific combat rules back into scope (the two
+      halves of `game_definitions.md` are always paired — never
+      load it without the pack's base `SKILL.md`, never split
+      it into stats and combat). Mistborn sessions also need
       `skill_view("ttrpg-mistborn", "resources/era_<n>.md")`
       for the era file the session metadata records.
-   c. `ttrpg-bootstrap` — only if the recovery is happening at
+   c. If the session metadata names a **source pack** for
+      imported combat (for example, a `ttrpg-pokemon` session
+      that resolves fights with DND's stat block), the agent
+      re-loads that source pack's `game_definitions.md` on
+      its own: `skill_view("ttrpg-<source>", "resources/game_definitions.md")`.
+      See `ttrpg-bootstrap` for the supplementary-file pattern
+      and the "load exactly one supplementary file from a
+      non-active pack at a time" rule.
+   d. `ttrpg-bootstrap` — only if the recovery is happening at
       session-resume time and the agent needs to re-confirm
       the bootstrap procedure. In-flight mid-session refreshes
       do not need to re-load bootstrap.
-   d. `ttrpg-clean` — only if a recovery read flagged a file
+   e. `ttrpg-clean` — only if a recovery read flagged a file
       that is over the 100-line budget or clearly full of
       stale entries. Otherwise skip; the compactor is for
       dedicated clean moments, not every refresh.

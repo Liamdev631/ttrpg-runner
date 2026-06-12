@@ -31,19 +31,7 @@ Load this pack only when the player explicitly wants The Expanse style of near-f
 
 ## Stat Guidance
 
-- `FOR` - force, EVA labor, physical pressure
-- `AGI` - movement, zero-g control, quick reactions
-- `ACC` - shooting, piloting precision, targeting
-- `INT` - engineering, medicine, analysis
-- `PER` - awareness, scans, situational reading
-- `COM` - command, negotiation, social poise
-
-Suggested derived trackers:
-
-- `HP = FOR + 4`
-- `Defense = AGI`
-- `Stress = PER`
-- `Reputation` starts at `0`
+Character definitions (stats, derived trackers, shipboard sheet anchors) live in [`resources/game_definitions.md`](./resources/game_definitions.md). That file is a supplementary pack: it pairs with this `SKILL.md`, or can be loaded on its own when a non-Expanse session wants to import Expanse's character sheet and hard-SF combat math.
 
 ## Gameplay Loop
 

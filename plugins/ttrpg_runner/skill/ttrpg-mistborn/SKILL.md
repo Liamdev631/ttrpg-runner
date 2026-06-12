@@ -49,18 +49,7 @@ Good Mistborn crews usually form around one of these patterns:
 
 # Character Basics
 
-Keep characters short, readable, and playable.
-
-Each PC should have:
-
-- a concept
-- a drive
-- a profession
-- a specialty
-- a distinctive feature
-- a defining personality trait
-
-Traits matter more than deep backstory. If a detail will not help during play, leave it out.
+Character sheet inputs and the six trait anchors (concept, drive, profession, specialty, distinctive feature, defining personality trait) live in [`resources/game_definitions.md`](./resources/game_definitions.md). That file is a supplementary pack: it pairs with this `SKILL.md`, or can be loaded on its own when a non-Mistborn session wants to import Mistborn's character sheet.
 
 # Core Resolution
 
@@ -120,33 +109,7 @@ When in doubt, spend a Nudge to make the current scene more decisive, not more c
 
 # Conflict Summary
 
-Conflicts cover combat, social pressure, and mental struggle with the same core logic.
-
-GM shorthand:
-
-- each round starts with declared actions
-- rolled action dice determine when characters actually act
-- unused action dice become defense dice
-- a character normally gets one reaction or one defense against a given action, not both
-
-Damage is simple:
-
-- base damage is 1
-- add weapon or tool bonuses
-- add 1 damage per Nudge spent on damage
-
-Wounds matter when one hit strips a large chunk of the target's remaining Resilience:
-
-- about 25 percent: Serious Burden
-- about 50 percent: Grave Burden
-
-At 0 in a Resilience track, the character is defeated in that arena:
-
-- `Health`: unconscious, dying, or dead
-- `Reputation`: disgraced
-- `Willpower`: emotionally or mentally broken
-
-Use defeat to push the story forward. Do not stop at "you lose."
+The conflict system, damage math, and Burden ladder live in [`resources/game_definitions.md`](./resources/game_definitions.md). That file is a supplementary pack: it pairs with this `SKILL.md` (and the loaded era file), or can be loaded on its own when a non-Mistborn session wants to import Mistborn's character sheet and conflict resolution. The base pack's "Core Resolution" and "Complications And Nudges" sections still govern how every roll is built.
 
 # Recovery And Time
 

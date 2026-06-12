@@ -24,31 +24,60 @@ If the requested game is outside that list, say that any TTRPG is still possible
 
 ## Pack Skill Layout
 
-Each flavor pack ships as its own first-class skill in the plugin. Every pack skill is a directory named `ttrpg-<pack>` containing a `SKILL.md` (the always-on ruleset for that pack) and, when the pack has era-specific or setting-specific submaterial, a `resources/` subdirectory. The agent loads packs through the standard `skill_view` tool:
+Each flavor pack ships as its own first-class skill in the plugin. Every pack skill is a directory named `ttrpg-<pack>` containing a `SKILL.md` (the always-on ruleset for that pack) and a `resources/` subdirectory. The agent loads packs through the standard `skill_view` tool:
 
 - `skill_view("ttrpg-<pack>")` reads the base `SKILL.md` of the pack
 - `skill_view("ttrpg-<pack>", "resources/<file>.md")` reads a specific reference inside the pack
 
-This matches the standard Hermes skill layout, so any future pack (and any future era / subpack) follows the same pattern. Mistborn is the existing example that already uses `resources/` for its era files.
+This matches the standard Hermes skill layout, so any future pack (and any future era / subpack) follows the same pattern.
+
+Every pack ships the same three files inside its `resources/` subdirectory, with one optional extra for Mistborn:
+
+- `resources/game_definitions.md` — the **supplementary** file. Holds the pack's **character definitions** (stats, derived trackers, sheet anchors) and its **combat mechanics** (the pack's own roll / damage / turn / meter rules). It is tightly paired with the base `SKILL.md`: the character definitions only make sense in the context of the pack's combat mechanics, and the combat mechanics only make sense in the context of the pack's character definitions. Every native pack ships this file.
+- `resources/era_<n>.md` — Mistborn-only. Era-specific submaterial that gates on a player question. See the Mistborn subpack flow below for how it pairs with the base pack.
+
+### Game definitions file (every pack)
+
+Every pack ships a `resources/game_definitions.md`. It is a **supplementary** file: it is meant to be loaded alongside the base `SKILL.md` of the same pack, and it is also designed to load on its own when a player wants to borrow a different pack's character sheet and combat resolution into a non-native setting.
+
+**What lives in `game_definitions.md`:**
+
+- **Character Definitions** — the pack's stat list, derived trackers (HP, Defense, Stress, Reputation), and the small set of concept anchors that make a sheet for that pack (class + background for DND, trainer + partner for Pokemon, traits for Mistborn, role + signature piece for Cyberpunk, role + shipboard posting for Expanse).
+- **Combat Mechanics** — the pack's own combat rules (DND's "when to roll" trigger, Pokemon's Companion Turn Rules, Mistborn's Conflict Summary, Cyberpunk's HEAT METER, Expanse's "when to roll" trigger).
+
+**Why the two halves are always paired:**
+
+- The **character definitions** are the inputs to the **combat mechanics**. DND's `STR` is meaningless without DND's roll card; Pokemon's `BND` is meaningless without Pokemon's Companion Turn Rules; Cyberpunk's `BOD` is meaningless without Cyberpunk's HEAT meter. The stats and the combat rules describe the same system from two angles, and either half used alone is broken.
+- This is why a `game_definitions.md` is always a single file per pack, never split into `stats.md` + `combat.md`. Splitting the two would invite one half to load without the other.
+
+**Two ways to load it:**
+
+- **Same-pack load (default).** Load the base `SKILL.md` and `game_definitions.md` together for any session that uses this pack natively.
+- **Cross-pack import.** When a player explicitly asks to import another pack's combat into a non-native setting (for example, "I want to play Pokemon but resolve fights with DND's stat block and roll math"), load the source pack's `game_definitions.md` alongside the active pack's `SKILL.md`. The agent must surface this as a deliberate choice in the crossover question, not silently substitute one pack's rules for another.
+
+The file is a self-contained supplementary pack: it documents its own purpose at the top, names the pack it belongs to, and is safe to read in isolation. The base `SKILL.md` is always preferred when the session is fully native; the supplementary file is the right shape when a non-native session wants to borrow a single system.
 
 ### Mistborn subpack flow
 
-Mistborn is a two-file pack: the base `SKILL.md` (always on) plus exactly one era file from `ttrpg-mistborn/resources/`. The two are tightly coupled — the base pack says "read this with one era file," and a single era file is useless without the base pack. The era answer is the gate that triggers both files to load in the same turn.
+Mistborn is a three-file pack: the base `SKILL.md` (always on) plus the supplementary `resources/game_definitions.md` (always on, like every other pack) plus exactly one era file from `ttrpg-mistborn/resources/`. The era file and the base pack are tightly coupled — the base pack says "read this with one era file," and a single era file is useless without the base pack. The `game_definitions.md` pairs with the base pack the same way it does for every other pack. The era answer is the gate that triggers the era file to load in the same turn as the other two.
 
 1. As soon as the player says they want Mistborn, ask for `Era 1` or `Era 2` and **wait** for the answer. Do not start loading the base pack yet — the era you pair it with is fixed by their answer.
-2. The instant the player answers (e.g. "era 1" / "the final empire"), load both in the same turn, before any other step:
+2. The instant the player answers (e.g. "era 1" / "the final empire"), load all three in the same turn, before any other step:
    - `skill_view("ttrpg-mistborn")` — the always-on Mistborn ruleset
+   - `skill_view("ttrpg-mistborn", "resources/game_definitions.md")` — the always-on supplementary file (Character Definitions + Conflict Summary)
    - `skill_view("ttrpg-mistborn", "resources/era_1.md")` *or* `skill_view("ttrpg-mistborn", "resources/era_2.md")` — whichever era they chose
    Loading the era file is part of resolving native support, not a follow-up you can defer. If the era file is not in scope, the base pack is not fully usable.
 3. Record the era in the `story.md` Session Metadata block (see "Session Metadata" below) so a resumed session remembers it.
-4. Read exactly one era file per Mistborn session, paired with the base `SKILL.md`. Era content lives in `ttrpg-mistborn/resources/` alongside the base pack.
+4. Read exactly one era file per Mistborn session, paired with the base `SKILL.md` and the supplementary `game_definitions.md`. Era content lives in `ttrpg-mistborn/resources/` alongside the supplementary file.
 
 ## Flavor Pack Loading Rules
 
 These rules are mandatory. They exist to stop cross-setting contamination while still allowing intentional crossovers of two native packs.
 
 - Determine the requested setting before you worldbuild. If the player has not named a setting, ask.
-- If the player names a single native setting, load that pack's base `SKILL.md` with `skill_view("ttrpg-<pack>")` (and any required `resources/` file for that pack). Single-setting play is single-pack.
+- If the player names a single native setting, load that pack's base `SKILL.md` with `skill_view("ttrpg-<pack>")` and its supplementary `resources/game_definitions.md` with `skill_view("ttrpg-<pack>", "resources/game_definitions.md")`. Single-setting play is single-pack.
+- A native pack's `game_definitions.md` is part of the always-on ruleset and must be in scope whenever the pack is the active setting. The file is paired with the base `SKILL.md` of the same pack, never split across files, and never loaded without the pack it describes (a `game_definitions.md` from a non-active pack must never be consulted).
+- A pack's `game_definitions.md` is also the right shape to load on its own when the player has explicitly asked to import another pack's character sheet and combat into a non-native setting. Treat that as a deliberate player choice: ask the question, record the source pack in the `story.md` header block, and load exactly one supplementary file from a non-active pack at a time.
 - If the player explicitly names a crossover of two native settings, load BOTH packs' base `SKILL.md` files, record both pack names in the `story.md` header block, and treat the session as a native crossover. Each pack keeps its own rules, tone, and reference tree; the player and GM blend them at the table. Do not silently demote a native crossover to generic mode.
 - When a crossover has two systems that conflict (stat blocks, magic systems, tech trees, damage scales, progression, etc.), the GM must ask the player how to resolve the conflict before worldbuilding. Do not pick silently. Examples: "Do we use the `ttrpg-cyberpunk` stat block or the `ttrpg-pokemon` stat block?", "Which magic/tech system applies, and how do the other system's powers map onto it?", "How does damage scale across both?", "How does progression work?". Record the player's answers in the `story.md` header block and stick to them for the whole session.
 - Only read deeper pack references from a pack that is active in the current session. A pack that is not loaded in this session must never be consulted.
@@ -103,16 +132,25 @@ skill/
   ttrpg-refresh/                  # /ttrpg-refresh - recover from a Hermes context compression
     SKILL.md
   ttrpg-cyberpunk/                # /ttrpg-cyberpunk
-    SKILL.md                      # base pack, no subpacks
-  ttrpg-dnd/                      # /ttrpg-dnd
-    SKILL.md
-  ttrpg-pokemon/                  # /ttrpg-pokemon
-    SKILL.md
-  ttrpg-expanse/                  # /ttrpg-expanse
-    SKILL.md
-  ttrpg-mistborn/                 # /ttrpg-mistborn
-    SKILL.md                      # base pack (always on once era is chosen)
+    SKILL.md                      # base pack (tone, jobs, factions, pressure)
     resources/
+      game_definitions.md         # supplementary: character sheet + HEAT meter
+  ttrpg-dnd/                      # /ttrpg-dnd
+    SKILL.md                      # base pack (tone, opening frame, play loop)
+    resources/
+      game_definitions.md         # supplementary: character sheet + roll math
+  ttrpg-pokemon/                  # /ttrpg-pokemon
+    SKILL.md                      # base pack (tone, partner bonds, play loop)
+    resources/
+      game_definitions.md         # supplementary: character sheet + companion turn rules
+  ttrpg-expanse/                  # /ttrpg-expanse
+    SKILL.md                      # base pack (tone, shipboard play loop)
+    resources/
+      game_definitions.md         # supplementary: character sheet + hard-SF combat math
+  ttrpg-mistborn/                 # /ttrpg-mistborn
+    SKILL.md                      # base pack (campaign setup, core resolution, recovery)
+    resources/
+      game_definitions.md         # supplementary: character sheet + Conflict Summary
       era_1.md                    # Era 1: Final Empire, Terris, Skaa, Heroes of the Trilogy
       era_2.md                    # Era 2: Industrial Scadrial, Elendel, the Roughs, Nobles
 ```

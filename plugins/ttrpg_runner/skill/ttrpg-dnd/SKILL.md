@@ -31,19 +31,7 @@ Load this pack only when the player explicitly wants DND, Dungeons and Dragons, 
 
 ## Stat Guidance
 
-- `STR` - force, lifting, grappling, breaking
-- `DEX` - finesse, stealth, ranged attacks, balance
-- `CON` - toughness, endurance, poison resistance
-- `INT` - lore, analysis, investigation
-- `WIS` - intuition, perception, survival
-- `CHA` - leadership, charm, intimidation, presence
-
-Suggested derived trackers:
-
-- `HP = CON + 4`
-- `Defense = DEX`
-- `Stress = WIS`
-- `Reputation` starts at `0`
+Character definitions (stats, derived trackers, sheet anchors) and the roll/combat math live in [`resources/game_definitions.md`](./resources/game_definitions.md). That file is a supplementary pack: it pairs with this `SKILL.md`, or can be loaded on its own when a non-DND session wants to import DND's character sheet and combat resolution.
 
 ## Gameplay Loop
 
